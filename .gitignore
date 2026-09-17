@@ -1,0 +1,23 @@
+# Dependencies & build
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Env
+.env
+.env.*
+
+# Superpowers brainstorm companion (session keys, mockups)
+.superpowers/
+
+# OS junk (exFAT / macOS AppleDouble)
+.DS_Store
+._*
+**/.DS_Store
+**/._*
+
+# Logs & editor
+*.log
+.vscode/
+.idea/
