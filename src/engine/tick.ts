@@ -1,6 +1,6 @@
 import { applyBossEffect, getAnnualBoss } from './bosses';
 import { applyChoice, maybeChoice } from './choices';
-import { EVENT_CHANCE } from './defaults';
+import { EVENT_CHANCE, SCHOOL_AFTER_MONTHS, SCHOOL_LIVING_BUMP } from './defaults';
 import { applyPaycheck, applySip, payBill } from './economy';
 import { evaluateEnding } from './ending';
 import { pickLifeEvent } from './events';
@@ -37,7 +37,31 @@ export function finishMonth(state: GameState): GameState {
     ageYears += 1;
     yearsPlayed += 1;
   }
-  const bumped = { ...state, ageMonths, ageYears, yearsPlayed, phase: 'playing' as const };
+  let bumped: GameState = {
+    ...state,
+    ageMonths,
+    ageYears,
+    yearsPlayed,
+    phase: 'playing',
+  };
+  if (bumped.hasChild && bumped.childMonths !== null) {
+    const childMonths = bumped.childMonths + 1;
+    if (childMonths === SCHOOL_AFTER_MONTHS && !bumped.schoolStarted) {
+      bumped = pushLedger(
+        {
+          ...bumped,
+          childMonths,
+          livingExpenses: bumped.livingExpenses + SCHOOL_LIVING_BUMP,
+          schoolStarted: true,
+        },
+        'system',
+        'School fees begin',
+        -SCHOOL_LIVING_BUMP,
+      );
+    } else {
+      bumped = { ...bumped, childMonths };
+    }
+  }
   if (ageYears === state.setup.targetRetirementAge && ageMonths === 0) {
     return {
       ...bumped,

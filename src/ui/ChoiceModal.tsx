@@ -1,5 +1,12 @@
+import { useState } from 'react';
 import { CAR_TIERS, HOUSE_TIERS } from '../engine/choices';
-import { CAR_ANNUAL_RATE, CAR_YEARS, HOME_ANNUAL_RATE, HOME_YEARS } from '../engine/defaults';
+import {
+  CAR_ANNUAL_RATE,
+  CAR_YEARS,
+  HOME_ANNUAL_RATE,
+  HOME_YEARS,
+  WEDDING_RECOMMENDED,
+} from '../engine/defaults';
 import { downPayment, emi } from '../engine/loans';
 import { formatInr } from '../lib/formatInr';
 import { useGameStore } from '../store/gameStore';
@@ -7,8 +14,91 @@ import { useGameStore } from '../store/gameStore';
 export function ChoiceModal() {
   const pendingChoice = useGameStore((s) => s.pendingChoice);
   const resolveChoice = useGameStore((s) => s.resolveChoice);
+  const [weddingSpend, setWeddingSpend] = useState(WEDDING_RECOMMENDED);
 
-  if (pendingChoice?.kind !== 'house' && pendingChoice?.kind !== 'car') {
+  if (!pendingChoice) {
+    return null;
+  }
+
+  if (pendingChoice.kind === 'marriage') {
+    return (
+      <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-950/70 md:p-4">
+        <div className="h-full w-full max-w-md overflow-y-auto border-amber-500 bg-slate-900 p-6 md:h-auto md:rounded-lg md:border">
+          <p className="bg-amber-500 px-3 py-1 text-sm font-semibold uppercase tracking-wide text-slate-950">
+            Life choice
+          </p>
+          <h2 className="mt-4 text-xl font-semibold">{pendingChoice.title}</h2>
+          <p className="mt-2 text-slate-300">{pendingChoice.copy}</p>
+          <label className="mt-6 block text-sm text-slate-300">
+            Wedding spend · {formatInr(weddingSpend)}
+            <input
+              className="mt-3 w-full"
+              type="range"
+              min={pendingChoice.minSpend}
+              max={pendingChoice.maxSpend}
+              step={pendingChoice.step}
+              value={weddingSpend}
+              onChange={(event) => setWeddingSpend(Number(event.target.value))}
+            />
+          </label>
+          <button
+            type="button"
+            className="mt-3 rounded-full border border-amber-500 px-3 py-1 text-sm text-amber-300"
+            onClick={() => setWeddingSpend(pendingChoice.recommended)}
+          >
+            Recommended · {formatInr(pendingChoice.recommended)}
+          </button>
+          <button
+            type="button"
+            className="mt-6 min-h-11 w-full rounded bg-amber-500 px-4 py-2 font-medium text-slate-950"
+            onClick={() => resolveChoice({ action: 'accept', spend: weddingSpend })}
+          >
+            Get married
+          </button>
+          <button
+            type="button"
+            className="mt-3 min-h-11 w-full rounded bg-slate-700 px-4 py-2 font-medium text-white"
+            onClick={() => resolveChoice({ action: 'dismiss' })}
+          >
+            Not yet
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (pendingChoice.kind === 'kid') {
+    return (
+      <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-950/70 md:p-4">
+        <div className="h-full w-full max-w-md overflow-y-auto border-amber-500 bg-slate-900 p-6 md:h-auto md:rounded-lg md:border">
+          <p className="bg-amber-500 px-3 py-1 text-sm font-semibold uppercase tracking-wide text-slate-950">
+            Life choice
+          </p>
+          <h2 className="mt-4 text-xl font-semibold">{pendingChoice.title}</h2>
+          <p className="mt-2 text-slate-300">{pendingChoice.copy}</p>
+          <p className="mt-4 text-sm text-slate-400">
+            Birth cost · {formatInr(pendingChoice.birthCost)}
+          </p>
+          <button
+            type="button"
+            className="mt-6 min-h-11 w-full rounded bg-amber-500 px-4 py-2 font-medium text-slate-950"
+            onClick={() => resolveChoice({ action: 'accept' })}
+          >
+            Yes, bacche
+          </button>
+          <button
+            type="button"
+            className="mt-3 min-h-11 w-full rounded bg-slate-700 px-4 py-2 font-medium text-white"
+            onClick={() => resolveChoice({ action: 'dismiss' })}
+          >
+            Not yet
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (pendingChoice.kind === 'taunt') {
     return null;
   }
 

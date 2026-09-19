@@ -33,6 +33,8 @@ export function Dashboard() {
   const canOpenCar = useGameStore(
     (s) => !s.ownedCar && payableCarTiers(s).length > 0,
   );
+  const canOpenMarriage = useGameStore((s) => s.ageYears >= 30 && !s.married);
+  const canOpenKid = useGameStore((s) => s.married && !s.hasChild);
   const monthlySalary = useGameStore((s) => s.monthlySalary);
   const livingExpenses = useGameStore((s) => s.livingExpenses);
   const rent = useGameStore((s) => s.rent);
@@ -121,6 +123,24 @@ export function Dashboard() {
               onClick={() => openChoice('car')}
             >
               Car
+            </button>
+          )}
+          {canOpenMarriage && (
+            <button
+              type="button"
+              className="mt-4 min-h-11 w-full rounded bg-amber-500 px-3 font-medium text-[var(--app-bg)] sm:ml-2 sm:w-auto"
+              onClick={() => openChoice('marriage')}
+            >
+              Shaadi
+            </button>
+          )}
+          {canOpenKid && (
+            <button
+              type="button"
+              className="mt-4 min-h-11 w-full rounded bg-amber-500 px-3 font-medium text-[var(--app-bg)] sm:ml-2 sm:w-auto"
+              onClick={() => openChoice('kid')}
+            >
+              Bacche
             </button>
           )}
         </div>

@@ -3,7 +3,7 @@ import { DEFAULT_SETUP } from './defaults';
 import { maybeChoice, openChoice } from './choices';
 import { homeEquity, liveNetWorth } from './netWorth';
 import { startGame } from './state';
-import { resolveChoice, tick } from './tick';
+import { finishMonth, resolveChoice, tick } from './tick';
 
 const noopRng = () => 0.5;
 const neverEvent = () => 0.99;
@@ -150,5 +150,113 @@ describe('car choice', () => {
       yearsPlayed: 1,
     });
     expect(july.pendingChoice?.kind).toBe('car');
+  });
+});
+
+describe('marriage and kid', () => {
+  it('does not offer marriage before age 30', () => {
+    const s = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageYears: 29,
+      cashBuffer: 20_00_000,
+      house: { tierId: 'bhk2', purchasePrice: 80_00_000, currentValue: 80_00_000 },
+      ownedCar: true,
+    });
+    expect(s.pendingChoice?.kind === 'marriage').toBe(false);
+  });
+
+  it('offers marriage at 30, records low-spend copy on acceptance, and leaves decline unmarried', () => {
+    const paused = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageYears: 30,
+      cashBuffer: 20_00_000,
+      plannedSip: 0,
+    });
+    expect(paused.pendingChoice?.kind).toBe('marriage');
+
+    const declined = resolveChoice(paused, { action: 'dismiss' }, noopRng);
+    expect(declined.married).toBe(false);
+
+    const done = resolveChoice(
+      paused,
+      { action: 'accept', spend: 3_00_000 },
+      noopRng,
+    );
+    expect(done.married).toBe(true);
+    expect(
+      done.ledger.some(
+        (entry) =>
+          entry.text.includes('laminated') || entry.text.includes('condolence'),
+      ),
+    ).toBe(true);
+  });
+
+  it('keeps an unaffordable wedding awaiting a choice', () => {
+    const paused = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageYears: 30,
+      cashBuffer: 1_00_000,
+      portfolioValue: 0,
+      plannedSip: 0,
+    });
+    expect(paused.pendingChoice?.kind).toBe('marriage');
+    const next = resolveChoice(
+      paused,
+      { action: 'accept', spend: 8_00_000 },
+      noopRng,
+    );
+    expect(next).toEqual(paused);
+  });
+
+  it('offers a kid the month after marriage, not in the wedding resolution', () => {
+    const paused = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageYears: 30,
+      cashBuffer: 20_00_000,
+      plannedSip: 0,
+    });
+    const married = resolveChoice(
+      paused,
+      { action: 'accept', spend: 8_00_000 },
+      noopRng,
+    );
+    expect(married.pendingChoice).toBeNull();
+    expect(married.hasChild).toBe(false);
+
+    const nextMonth = maybeChoice({ ...married, phase: 'playing' });
+    expect(nextMonth.pendingChoice?.kind).toBe('kid');
+  });
+
+  it('charges for birth, raises living costs, and starts school at child month 36', () => {
+    const kidPause = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageYears: 30,
+      married: true,
+      offered: { house: true, car: true, marriage: true, kid: false },
+      cashBuffer: 5_00_000,
+      plannedSip: 0,
+      livingExpenses: 30_000,
+    });
+    expect(kidPause.pendingChoice?.kind).toBe('kid');
+
+    const born = resolveChoice(kidPause, { action: 'accept' }, noopRng);
+    expect(born.hasChild).toBe(true);
+    expect(born.livingExpenses).toBe(42_000);
+    expect(
+      born.ledger.some(
+        (entry) => entry.text.includes('Birth') && entry.amount === -1_50_000,
+      ),
+    ).toBe(true);
+
+    let s = born;
+    let guard = 0;
+    while (s.childMonths !== 36 && guard < 40) {
+      s = finishMonth({ ...s, phase: 'playing', pendingChoice: null });
+      guard += 1;
+    }
+    expect(guard).toBeLessThan(40);
+    expect(s.childMonths).toBe(36);
+    expect(s.schoolStarted).toBe(true);
+    expect(s.livingExpenses).toBe(52_000);
   });
 });

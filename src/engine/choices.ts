@@ -1,4 +1,15 @@
-import { CAR_ANNUAL_RATE, CAR_YEARS, HOME_ANNUAL_RATE, HOME_YEARS } from './defaults';
+import {
+  BIRTH_COST,
+  CAR_ANNUAL_RATE,
+  CAR_YEARS,
+  HOME_ANNUAL_RATE,
+  HOME_YEARS,
+  KID_LIVING_BUMP,
+  WEDDING_MAX,
+  WEDDING_MIN,
+  WEDDING_RECOMMENDED,
+  WEDDING_STEP,
+} from './defaults';
 import { payBill } from './economy';
 import { canAffordDownPayment, downPayment, originateLoan } from './loans';
 import { pushLedger } from './state';
@@ -15,6 +26,16 @@ export const CAR_TIERS = [
   { id: 'new' as const, label: 'New', price: 10_00_000 },
   { id: 'suv' as const, label: 'SUV', price: 20_00_000 },
 ];
+
+export function weddingCopy(spend: number): string {
+  if (spend < 5_00_000) {
+    return 'Spouse has been staring at the laminated menu. Relatives sent a condolence GIF.';
+  }
+  if (spend <= 10_00_000) {
+    return 'Respectable. The aunties will still talk.';
+  }
+  return 'Izzat delivered. The FD is a husk.';
+}
 
 export function payableHouseTiers(state: GameState): HouseTierId[] {
   return HOUSE_TIERS.filter((tier) =>
@@ -47,11 +68,40 @@ function housePending(state: GameState): GameState {
 }
 
 function maybeMarriage(state: GameState): GameState {
-  return state;
+  if (state.ageYears < 30 || state.married || state.offered.marriage) {
+    return state;
+  }
+  return {
+    ...state,
+    pendingChoice: {
+      kind: 'marriage',
+      title: 'Shaadi',
+      copy: 'Choose how much family prestige the FD can absorb.',
+      recommended: WEDDING_RECOMMENDED,
+      minSpend: WEDDING_MIN,
+      maxSpend: WEDDING_MAX,
+      step: WEDDING_STEP,
+    },
+    phase: 'awaitingChoice',
+    offered: { ...state.offered, marriage: true },
+  };
 }
 
 function maybeKid(state: GameState): GameState {
-  return state;
+  if (!state.married || state.hasChild || state.offered.kid) {
+    return state;
+  }
+  return {
+    ...state,
+    pendingChoice: {
+      kind: 'kid',
+      title: 'Bacche?',
+      copy: 'One tiny dependent, one permanent line item.',
+      birthCost: BIRTH_COST,
+    },
+    phase: 'awaitingChoice',
+    offered: { ...state.offered, kid: true },
+  };
 }
 
 function maybeHouse(state: GameState): GameState {
@@ -123,6 +173,35 @@ export function openChoice(state: GameState, kind: ChoiceKind): GameState {
       offered: { ...state.offered, car: true },
     };
   }
+  if (kind === 'marriage' && state.ageYears >= 30 && !state.married) {
+    return {
+      ...state,
+      pendingChoice: {
+        kind: 'marriage',
+        title: 'Shaadi',
+        copy: 'Choose how much family prestige the FD can absorb.',
+        recommended: WEDDING_RECOMMENDED,
+        minSpend: WEDDING_MIN,
+        maxSpend: WEDDING_MAX,
+        step: WEDDING_STEP,
+      },
+      phase: 'awaitingChoice',
+      offered: { ...state.offered, marriage: true },
+    };
+  }
+  if (kind === 'kid' && state.married && !state.hasChild) {
+    return {
+      ...state,
+      pendingChoice: {
+        kind: 'kid',
+        title: 'Bacche?',
+        copy: 'One tiny dependent, one permanent line item.',
+        birthCost: BIRTH_COST,
+      },
+      phase: 'awaitingChoice',
+      offered: { ...state.offered, kid: true },
+    };
+  }
   return state;
 }
 
@@ -175,6 +254,42 @@ export function applyChoice(state: GameState, input: ChoiceInput): GameState {
       loans: [...next.loans, originateLoan('car', principal, CAR_ANNUAL_RATE, CAR_YEARS)],
     };
     return pushLedger(next, 'choice', `Bought ${tier.label} car`, 0);
+  }
+  if (state.pendingChoice.kind === 'marriage') {
+    if (input.spend === undefined || !Number.isFinite(input.spend)) {
+      return state;
+    }
+    const spend = Math.max(
+      WEDDING_MIN,
+      Math.min(
+        WEDDING_MAX,
+        Math.round(input.spend / WEDDING_STEP) * WEDDING_STEP,
+      ),
+    );
+    const next = payBill(state, spend, weddingCopy(spend));
+    if (next.phase === 'ended') {
+      return state;
+    }
+    return {
+      ...next,
+      pendingChoice: null,
+      phase: 'playing',
+      married: true,
+    };
+  }
+  if (state.pendingChoice.kind === 'kid') {
+    const next = payBill(state, BIRTH_COST, 'Birth and hospital bill');
+    if (next.phase === 'ended') {
+      return state;
+    }
+    return {
+      ...next,
+      pendingChoice: null,
+      phase: 'playing',
+      hasChild: true,
+      childMonths: 0,
+      livingExpenses: next.livingExpenses + KID_LIVING_BUMP,
+    };
   }
   return state;
 }

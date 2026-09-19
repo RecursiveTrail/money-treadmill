@@ -16,6 +16,14 @@ export const CAR_YEARS = 5;
 export const DOWN_PAYMENT_RATE = 0.2;
 export const FD_ANNUAL_RATE = 0.05;
 export const HOUSE_ANNUAL_APPRECIATION = 0.05;
+export const WEDDING_MIN = 2_00_000;
+export const WEDDING_MAX = 25_00_000;
+export const WEDDING_STEP = 50_000;
+export const WEDDING_RECOMMENDED = 8_00_000;
+export const BIRTH_COST = 1_50_000;
+export const KID_LIVING_BUMP = 12_000;
+export const SCHOOL_LIVING_BUMP = 10_000;
+export const SCHOOL_AFTER_MONTHS = 36;
 export const TICK_MS: Record<1 | 2 | 4, number> = { 1: 2000, 2: 1000, 4: 500 };
 
 export const DEFAULT_SETUP: SetupConfig = {
