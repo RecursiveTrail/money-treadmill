@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SETUP } from './defaults';
+import { DEFAULT_SETUP, HOME_ANNUAL_RATE, HOME_YEARS } from './defaults';
 import { applyPaycheck, applySip, compound, liquidate, payBill } from './economy';
+import { originateLoan } from './loans';
 import { startGame } from './state';
 
 function withCash(cash: number, portfolio = 0) {
@@ -37,6 +38,36 @@ describe('applyPaycheck', () => {
     const next = applyPaycheck({ ...withCash(10_000), rent: 0, livingExpenses: 55_000 });
     expect(next.ledger.some((e) => e.text === 'Rent')).toBe(false);
     expect(next.ledger.find((e) => e.text === 'Living expenses')?.amount).toBe(-55_000);
+  });
+
+  it('deducts living, rent, and EMI then amortizes when cash covers it', () => {
+    const loan = originateLoan('home', 64_00_000, HOME_ANNUAL_RATE, HOME_YEARS);
+    const next = applyPaycheck({
+      ...withCash(0),
+      livingExpenses: 30_000,
+      rent: 0,
+      loans: [loan],
+      monthlySalary: 1_00_000,
+    });
+    expect(next.cashBuffer).toBe(0 + 1_00_000 - 30_000 - loan.emi);
+    expect(next.loans[0]?.principalRemaining).toBeLessThan(loan.principalRemaining);
+    expect(next.phase).not.toBe('ended');
+  });
+
+  it('forfeits house and loans on bankrupt', () => {
+    const loan = originateLoan('home', 64_00_000, HOME_ANNUAL_RATE, HOME_YEARS);
+    const next = applyPaycheck({
+      ...withCash(0, 0),
+      monthlySalary: 10_000,
+      livingExpenses: 30_000,
+      rent: 0,
+      loans: [loan],
+      house: { tierId: 'bhk2', purchasePrice: 80_00_000, currentValue: 80_00_000 },
+    });
+    expect(next.phase).toBe('ended');
+    expect(next.ending?.result).toBe('bankrupt');
+    expect(next.house).toBeNull();
+    expect(next.loans).toEqual([]);
   });
 });
 

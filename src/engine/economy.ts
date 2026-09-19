@@ -1,5 +1,6 @@
 import { formatInr } from '../lib/formatInr';
 import { MONTHLY_RETURN, STCG_RATE } from './defaults';
+import { amortize } from './loans';
 import { pushLedger } from './state';
 import type { Ending, GameState } from './types';
 
@@ -36,6 +37,9 @@ export function liquidate(state: GameState, deficit: number): GameState {
       isPaused: true,
       pendingEvent: null,
       pendingBoss: null,
+      pendingChoice: null,
+      house: null,
+      loans: [],
       ending: bankruptEnding(state),
     };
     return pushLedger(wiped, 'liquidation', 'Liquidated portfolio: wiped out (includes 20% STCG)', -state.portfolioValue);
@@ -54,7 +58,8 @@ export function liquidate(state: GameState, deficit: number): GameState {
 }
 
 export function applyPaycheck(state: GameState): GameState {
-  const outflow = state.livingExpenses + state.rent;
+  const emiTotal = state.loans.reduce((sum, loan) => sum + loan.emi, 0);
+  const outflow = state.livingExpenses + state.rent + emiTotal;
   let next = pushLedger(
     { ...state, cashBuffer: state.cashBuffer + state.monthlySalary - outflow },
     'salary',
@@ -62,14 +67,23 @@ export function applyPaycheck(state: GameState): GameState {
     state.monthlySalary,
   );
   next = pushLedger(next, 'expense', 'Living expenses', -state.livingExpenses);
-  if (state.rent !== 0) {
+  if (state.rent > 0) {
     next = pushLedger(next, 'expense', 'Rent', -state.rent);
+  }
+  for (const loan of state.loans) {
+    next = pushLedger(next, 'emi', loan.kind === 'home' ? 'Home EMI' : 'Car EMI', -loan.emi);
   }
   if (next.cashBuffer < 0) {
     const deficit = -next.cashBuffer;
     next = liquidate({ ...next, cashBuffer: 0 }, deficit);
   }
-  return next;
+  if (next.phase === 'ended') {
+    return next;
+  }
+  const loans = next.loans
+    .map((loan) => amortize(loan))
+    .filter((loan): loan is NonNullable<typeof loan> => loan !== null);
+  return { ...next, loans };
 }
 
 export function payBill(state: GameState, cost: number, text: string): GameState {
