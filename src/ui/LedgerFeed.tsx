@@ -1,5 +1,5 @@
-import { formatInr } from '../lib/formatInr';
 import type { LedgerEntry } from '../engine/types';
+import { ledgerLine } from './ledgerText';
 
 export function LedgerFeed({ entries }: { entries: LedgerEntry[] }) {
   return (
@@ -7,8 +7,7 @@ export function LedgerFeed({ entries }: { entries: LedgerEntry[] }) {
       {entries.map((row) => (
         <div key={row.id} className={row.amount < 0 ? 'text-rose-300' : 'text-emerald-300'}>
           <span className="text-slate-500">{row.monthLabel} · </span>
-          {row.text}
-          {row.amount !== 0 ? ` ${formatInr(row.amount)}` : ''}
+          {ledgerLine(row.text, row.amount)}
         </div>
       ))}
     </div>
