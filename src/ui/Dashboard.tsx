@@ -1,5 +1,7 @@
 import { Pause, Play } from 'lucide-react';
 import { ageLabel, monthLabel } from '../engine/calendar';
+import { payableHouseTiers } from '../engine/choices';
+import { liveNetWorth } from '../engine/netWorth';
 import { formatInr } from '../lib/formatInr';
 import { useGameStore } from '../store/gameStore';
 import { AnimatedNumber } from './AnimatedNumber';
@@ -11,6 +13,10 @@ export function Dashboard() {
   const ageMonths = useGameStore((s) => s.ageMonths);
   const yearsPlayed = useGameStore((s) => s.yearsPlayed);
   const portfolioValue = useGameStore((s) => s.portfolioValue);
+  const netWorth = useGameStore(liveNetWorth);
+  const canOpenHouse = useGameStore(
+    (s) => !s.house && payableHouseTiers(s).length > 0,
+  );
   const monthlySalary = useGameStore((s) => s.monthlySalary);
   const livingExpenses = useGameStore((s) => s.livingExpenses);
   const rent = useGameStore((s) => s.rent);
@@ -22,6 +28,7 @@ export function Dashboard() {
   const setPaused = useGameStore((s) => s.setPaused);
   const setTickSpeed = useGameStore((s) => s.setTickSpeed);
   const setSip = useGameStore((s) => s.setSip);
+  const openChoice = useGameStore((s) => s.openChoice);
 
   return (
     <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 p-6">
@@ -29,8 +36,21 @@ export function Dashboard() {
         <p className="text-slate-300">
           {monthLabel(yearsPlayed, ageMonths)} · Age {ageLabel(ageYears, ageMonths)}
         </p>
-        <AnimatedNumber value={portfolioValue} className="text-2xl font-semibold text-emerald-400" />
+        <div className="text-center">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Net worth</p>
+          <AnimatedNumber value={netWorth} className="text-2xl font-semibold text-emerald-400" />
+          <p className="text-xs text-slate-400">Portfolio {formatInr(portfolioValue)}</p>
+        </div>
         <div className="flex items-center gap-2">
+          {canOpenHouse && (
+            <button
+              type="button"
+              className="rounded bg-amber-500 px-3 py-1 font-medium text-slate-950"
+              onClick={() => openChoice('house')}
+            >
+              House
+            </button>
+          )}
           <button
             type="button"
             className="rounded bg-slate-800 px-3 py-1"

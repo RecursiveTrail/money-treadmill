@@ -1,3 +1,4 @@
+import { ChoiceModal } from './ui/ChoiceModal';
 import { Dashboard } from './ui/Dashboard';
 import { EndReceipt } from './ui/EndReceipt';
 import { EventModal } from './ui/EventModal';
@@ -13,6 +14,7 @@ export default function App() {
       {phase === 'setup' && <SetupScreen />}
       {phase !== 'setup' && phase !== 'ended' && <Dashboard />}
       {(phase === 'awaitingEvent' || phase === 'awaitingBoss') && <EventModal />}
+      {phase === 'awaitingChoice' && <ChoiceModal />}
       {phase === 'ended' && <EndReceipt />}
     </div>
   );

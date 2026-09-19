@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETUP } from './defaults';
 import { startGame } from './state';
-import { applyBossAndFinish, payPending, tick } from './tick';
+import { applyBossAndFinish, payPending, resolveChoice, tick } from './tick';
 import type { GameState, Rng } from './types';
 
 const neverEvent: Rng = () => 0.99;
@@ -9,8 +9,11 @@ const alwaysEvent: Rng = () => 0.0;
 
 function completeQuietMonth(state: GameState): GameState {
   let next = tick(state, neverEvent);
+  if (next.phase === 'awaitingChoice') {
+    next = resolveChoice(next, { action: 'dismiss' }, neverEvent);
+  }
   if (next.phase === 'awaitingBoss' || next.phase === 'awaitingEvent') {
-    next = payPending(next);
+    next = payPending(next, neverEvent);
   }
   return next;
 }
@@ -47,8 +50,10 @@ describe('tick', () => {
     while (s.phase !== 'ended' && guard < 800) {
       if (s.phase === 'playing') {
         s = tick(s, neverEvent);
+      } else if (s.phase === 'awaitingChoice') {
+        s = resolveChoice(s, { action: 'dismiss' }, neverEvent);
       } else {
-        s = payPending(s);
+        s = payPending(s, neverEvent);
       }
       guard += 1;
     }

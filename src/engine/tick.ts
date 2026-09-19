@@ -1,10 +1,11 @@
 import { applyBossEffect, getAnnualBoss } from './bosses';
+import { applyChoice, maybeChoice } from './choices';
 import { EVENT_CHANCE } from './defaults';
 import { applyPaycheck, applySip, compound, payBill } from './economy';
 import { evaluateEnding } from './ending';
 import { pickLifeEvent } from './events';
 import { pushLedger } from './state';
-import type { GameState, Rng } from './types';
+import type { ChoiceInput, GameState, Rng } from './types';
 
 export function beginMonth(state: GameState, rng: Rng): GameState {
   if (state.phase !== 'playing') {
@@ -47,17 +48,8 @@ export function finishMonth(state: GameState): GameState {
   return bumped;
 }
 
-export function continueMonth(state: GameState): GameState {
-  let next = state;
-  if (next.pendingEvent) {
-    const event = next.pendingEvent;
-    next = payBill(next, event.cost, event.title);
-    next = { ...next, pendingEvent: null };
-    if (next.phase === 'ended') {
-      return next;
-    }
-  }
-  next = applySip(next);
+export function continueMonthTail(state: GameState, _rng: Rng): GameState {
+  let next = applySip(state);
   next = compound(next);
   if (next.needsAnnualBoss) {
     return {
@@ -67,6 +59,23 @@ export function continueMonth(state: GameState): GameState {
     };
   }
   return finishMonth(next);
+}
+
+export function continueMonth(state: GameState, rng: Rng): GameState {
+  let next = state;
+  if (next.pendingEvent) {
+    const event = next.pendingEvent;
+    next = payBill(next, event.cost, event.title);
+    next = { ...next, pendingEvent: null };
+    if (next.phase === 'ended') {
+      return next;
+    }
+  }
+  next = maybeChoice(next);
+  if (next.phase === 'awaitingChoice') {
+    return next;
+  }
+  return continueMonthTail(next, rng);
 }
 
 export function applyBossAndFinish(state: GameState): GameState {
@@ -98,15 +107,23 @@ export function tick(state: GameState, rng: Rng): GameState {
   if (after.phase !== 'playing') {
     return after;
   }
-  return continueMonth(after);
+  return continueMonth(after, rng);
 }
 
-export function payPending(state: GameState): GameState {
+export function payPending(state: GameState, rng: Rng): GameState {
   if (state.phase === 'awaitingEvent') {
-    return continueMonth(state);
+    return continueMonth(state, rng);
   }
   if (state.phase === 'awaitingBoss') {
     return applyBossAndFinish(state);
   }
   return state;
+}
+
+export function resolveChoice(state: GameState, input: ChoiceInput, rng: Rng): GameState {
+  const applied = applyChoice(state, input);
+  if (applied.phase === 'ended' || applied.phase === 'awaitingChoice') {
+    return applied;
+  }
+  return continueMonthTail(applied, rng);
 }
