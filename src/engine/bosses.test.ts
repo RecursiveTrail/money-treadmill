@@ -43,17 +43,17 @@ describe('applyBossEffect rent-spike and expenseMul', () => {
   it('cpi-5 rounds living and rent independently when rent > 0', () => {
     const boss = getAnnualBoss(5);
     expect(boss.id).toBe('cpi-5');
-    const base = { ...startGame(DEFAULT_SETUP), livingExpenses: 30_000, rent: 25_000 };
+    const base = { ...startGame(DEFAULT_SETUP), livingExpenses: 10_001, rent: 3_333 };
     const next = applyBossEffect(base, boss);
-    expect(next.livingExpenses).toBe(Math.round(30_000 * 1.05));
-    expect(next.rent).toBe(Math.round(25_000 * 1.05));
+    expect(next.livingExpenses).toBe(10_501);
+    expect(next.rent).toBe(3_500);
   });
 
   it('cpi-5 rounds living only and keeps rent at 0 when rent is 0', () => {
     const boss = getAnnualBoss(5);
-    const base = { ...startGame(DEFAULT_SETUP), livingExpenses: 55_000, rent: 0 };
+    const base = { ...startGame(DEFAULT_SETUP), livingExpenses: 10_001, rent: 0 };
     const next = applyBossEffect(base, boss);
-    expect(next.livingExpenses).toBe(Math.round(55_000 * 1.05));
+    expect(next.livingExpenses).toBe(10_501);
     expect(next.rent).toBe(0);
   });
 });
