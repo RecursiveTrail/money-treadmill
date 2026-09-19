@@ -68,6 +68,7 @@ describe('applyPaycheck', () => {
     expect(next.ending?.result).toBe('bankrupt');
     expect(next.house).toBeNull();
     expect(next.loans).toEqual([]);
+    expect(next.ledger.some((e) => e.kind === 'emi')).toBe(false);
   });
 });
 
