@@ -12,6 +12,8 @@ npm test         # Vitest (node)
 npm run build    # tsc -b && vite build
 ```
 
+GitHub Pages: push to `main` runs `.github/workflows/deploy-pages.yml` (test + build + deploy). Live URL is `https://<org>.github.io/money-treadmill/`. Local Pages-shaped build: `BASE_PATH=/money-treadmill/ npm run build`. `vite.config.ts` uses `BASE_PATH` when set, otherwise `/`.
+
 This repo often lives on **exFAT**. macOS creates `._*` AppleDouble files. Vitest must `exclude: ['**/._*']` (`vite.config.ts`). Never commit `._*` (already in `.gitignore`). If tests suddenly fail with `Unexpected "\x00"`, delete `src/**/._*` and re-run.
 
 ## Architecture
