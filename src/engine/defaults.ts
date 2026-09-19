@@ -8,6 +8,14 @@ export const MONTHLY_RETURN = 1.01;
 export const INFLATION_RATE = 0.07;
 export const STCG_RATE = 0.2;
 export const LEDGER_CAP = 50;
+export const DEFAULT_RENT = 25_000;
+export const HOME_ANNUAL_RATE = 0.08;
+export const HOME_YEARS = 20;
+export const CAR_ANNUAL_RATE = 0.10;
+export const CAR_YEARS = 5;
+export const DOWN_PAYMENT_RATE = 0.2;
+export const FD_ANNUAL_RATE = 0.05;
+export const HOUSE_ANNUAL_APPRECIATION = 0.05;
 export const TICK_MS: Record<1 | 2 | 4, number> = { 1: 2000, 2: 1000, 4: 500 };
 
 export const DEFAULT_SETUP: SetupConfig = {
@@ -16,5 +24,5 @@ export const DEFAULT_SETUP: SetupConfig = {
   monthlySalary: 100_000,
   fixedExpenses: 55_000,
   plannedSip: 30_000,
-  targetCorpusToday: 40_00_000,
+  targetCorpusToday: 75_00_000,
 };

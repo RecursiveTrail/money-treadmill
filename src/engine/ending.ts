@@ -17,6 +17,8 @@ export function evaluateEnding(state: GameState): Ending {
     tax,
     afterTax,
     cashLeft: state.cashBuffer,
+    homeEquity: 0,
+    netWorth: afterTax,
     realPurchasingPower: real,
     targetCorpusToday: state.setup.targetCorpusToday,
   };

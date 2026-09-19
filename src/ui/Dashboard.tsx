@@ -12,7 +12,8 @@ export function Dashboard() {
   const yearsPlayed = useGameStore((s) => s.yearsPlayed);
   const portfolioValue = useGameStore((s) => s.portfolioValue);
   const monthlySalary = useGameStore((s) => s.monthlySalary);
-  const fixedExpenses = useGameStore((s) => s.fixedExpenses);
+  const livingExpenses = useGameStore((s) => s.livingExpenses);
+  const rent = useGameStore((s) => s.rent);
   const plannedSip = useGameStore((s) => s.plannedSip);
   const cashBuffer = useGameStore((s) => s.cashBuffer);
   const isPaused = useGameStore((s) => s.isPaused);
@@ -54,7 +55,12 @@ export function Dashboard() {
         <section className="rounded-lg bg-slate-800 p-4">
           <p className="text-xs uppercase tracking-wide text-slate-400">Inflows / outflows</p>
           <p className="mt-3 text-emerald-400">Salary +{formatInr(monthlySalary)}</p>
-          <p className="text-rose-500">Rent &amp; bills −{formatInr(fixedExpenses)}</p>
+          <p className="text-[var(--expense)]">Living −{formatInr(livingExpenses)}</p>
+          {rent > 0 ? (
+            <p className="text-[var(--expense)]">Rent −{formatInr(rent)}</p>
+          ) : (
+            <p className="text-[var(--muted)]">Rent: owned</p>
+          )}
           <label className="mt-6 block text-sm text-slate-400">
             SIP next month · {formatInr(plannedSip)}
             <input

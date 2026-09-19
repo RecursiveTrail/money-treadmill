@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SETUP, STARTING_CASH } from './defaults';
+import { DEFAULT_RENT, DEFAULT_SETUP, STARTING_CASH } from './defaults';
 import { pushLedger, resetToSetup, startGame } from './state';
 
 describe('startGame', () => {
@@ -13,6 +13,26 @@ describe('startGame', () => {
     expect(s.portfolioValue).toBe(0);
     expect(s.ltcgRate).toBe(0.1);
     expect(s.needsAnnualBoss).toBe(false);
+  });
+
+  it('splits default expenses into rent 25000 and living 30000', () => {
+    const s = startGame(DEFAULT_SETUP);
+    expect(s.rent).toBe(DEFAULT_RENT);
+    expect(s.livingExpenses).toBe(30_000);
+    expect(s.loans).toEqual([]);
+    expect(s.house).toBeNull();
+    expect(s.married).toBe(false);
+    expect(s.hasChild).toBe(false);
+    expect(s.childMonths).toBeNull();
+    expect(s.schoolStarted).toBe(false);
+    expect(s.pendingChoice).toBeNull();
+    expect(s.offered).toEqual({ house: false, car: false, marriage: false, kid: false });
+  });
+
+  it('caps rent at expenses when setup expenses are below DEFAULT_RENT', () => {
+    const s = startGame({ ...DEFAULT_SETUP, fixedExpenses: 20_000 });
+    expect(s.rent).toBe(20_000);
+    expect(s.livingExpenses).toBe(0);
   });
 });
 

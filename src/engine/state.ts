@@ -1,8 +1,15 @@
 import { ageLabel, monthLabel } from './calendar';
-import { DEFAULT_SETUP, LEDGER_CAP, STARTING_CASH, STARTING_LTCG } from './defaults';
+import {
+  DEFAULT_RENT,
+  DEFAULT_SETUP,
+  LEDGER_CAP,
+  STARTING_CASH,
+  STARTING_LTCG,
+} from './defaults';
 import type { GameState, LedgerKind, SetupConfig } from './types';
 
 export function startGame(setup: SetupConfig): GameState {
+  const rent = Math.min(DEFAULT_RENT, setup.fixedExpenses);
   return {
     phase: 'playing',
     setup,
@@ -13,12 +20,21 @@ export function startGame(setup: SetupConfig): GameState {
     portfolioValue: 0,
     investedAmount: 0,
     monthlySalary: setup.monthlySalary,
-    fixedExpenses: setup.fixedExpenses,
+    livingExpenses: setup.fixedExpenses - rent,
+    rent,
     plannedSip: setup.plannedSip,
     ltcgRate: STARTING_LTCG,
     pendingEvent: null,
     pendingBoss: null,
+    pendingChoice: null,
     needsAnnualBoss: false,
+    loans: [],
+    house: null,
+    married: false,
+    hasChild: false,
+    childMonths: null,
+    schoolStarted: false,
+    offered: { house: false, car: false, marriage: false, kid: false },
     ledger: [],
     ledgerSeq: 0,
     isPaused: false,

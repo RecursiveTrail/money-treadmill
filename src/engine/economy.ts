@@ -13,6 +13,8 @@ function bankruptEnding(state: GameState): Ending {
     tax: 0,
     afterTax: 0,
     cashLeft: 0,
+    homeEquity: 0,
+    netWorth: 0,
     realPurchasingPower: 0,
     targetCorpusToday: state.setup.targetCorpusToday,
   };
@@ -52,13 +54,17 @@ export function liquidate(state: GameState, deficit: number): GameState {
 }
 
 export function applyPaycheck(state: GameState): GameState {
+  const outflow = state.livingExpenses + state.rent;
   let next = pushLedger(
-    { ...state, cashBuffer: state.cashBuffer + state.monthlySalary - state.fixedExpenses },
+    { ...state, cashBuffer: state.cashBuffer + state.monthlySalary - outflow },
     'salary',
     `Salary credited`,
     state.monthlySalary,
   );
-  next = pushLedger(next, 'expense', 'Fixed expenses', -state.fixedExpenses);
+  next = pushLedger(next, 'expense', 'Living expenses', -state.livingExpenses);
+  if (state.rent !== 0) {
+    next = pushLedger(next, 'expense', 'Rent', -state.rent);
+  }
   if (next.cashBuffer < 0) {
     const deficit = -next.cashBuffer;
     next = liquidate({ ...next, cashBuffer: 0 }, deficit);

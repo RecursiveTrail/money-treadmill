@@ -11,7 +11,7 @@ describe('getAnnualBoss', () => {
   it('sets year-2 LTCG to 12.5%', () => {
     const boss = getAnnualBoss(2);
     expect(boss.id).toBe('ltcg-hike');
-    const next = applyBossEffect(startGame(DEFAULT_SETUP), boss.effect);
+    const next = applyBossEffect(startGame(DEFAULT_SETUP), boss);
     expect(next.ltcgRate).toBe(0.125);
   });
 

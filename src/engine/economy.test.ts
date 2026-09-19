@@ -17,7 +17,8 @@ describe('applyPaycheck', () => {
     const next = applyPaycheck({
       ...withCash(0, 100_000),
       monthlySalary: 10_000,
-      fixedExpenses: 40_000,
+      livingExpenses: 40_000,
+      rent: 0,
     });
     expect(next.cashBuffer).toBe(0);
     expect(next.portfolioValue).toBe(100_000 - 30_000 - 6_000);

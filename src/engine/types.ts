@@ -1,4 +1,10 @@
-export type Phase = 'setup' | 'playing' | 'awaitingEvent' | 'awaitingBoss' | 'ended';
+export type Phase =
+  | 'setup'
+  | 'playing'
+  | 'awaitingEvent'
+  | 'awaitingBoss'
+  | 'awaitingChoice'
+  | 'ended';
 
 export type SetupConfig = {
   startAgeYears: number;
@@ -9,7 +15,19 @@ export type SetupConfig = {
   targetCorpusToday: number;
 };
 
-export type LedgerKind = 'salary' | 'expense' | 'sip' | 'event' | 'liquidation' | 'boss' | 'interest' | 'system';
+export type LedgerKind =
+  | 'salary'
+  | 'expense'
+  | 'sip'
+  | 'event'
+  | 'liquidation'
+  | 'boss'
+  | 'interest'
+  | 'system'
+  | 'choice'
+  | 'transfer'
+  | 'taunt'
+  | 'emi';
 
 export type LedgerEntry = {
   id: string;
@@ -32,6 +50,53 @@ export type BossEffect =
 
 export type PendingBoss = { id: string; title: string; copy: string; effect: BossEffect };
 
+export type HouseTierId = 'bhk2' | 'bhk3' | 'premium';
+export type CarTierId = 'used' | 'new' | 'suv';
+export type LoanKind = 'home' | 'car';
+export type ChoiceKind = 'house' | 'car' | 'marriage' | 'kid' | 'taunt';
+
+export type Loan = {
+  kind: LoanKind;
+  originalPrincipal: number;
+  principalRemaining: number;
+  annualRate: number;
+  emi: number;
+  monthsTotal: number;
+  monthsRemaining: number;
+};
+
+export type House = {
+  tierId: HouseTierId;
+  purchasePrice: number;
+  currentValue: number;
+};
+
+export type OfferedFlags = {
+  house: boolean;
+  car: boolean;
+  marriage: boolean;
+  kid: boolean;
+};
+
+export type PendingChoice =
+  | { kind: 'house'; title: string; copy: string; payableTierIds: HouseTierId[] }
+  | { kind: 'car'; title: string; copy: string; payableTierIds: CarTierId[] }
+  | {
+      kind: 'marriage';
+      title: string;
+      copy: string;
+      recommended: number;
+      minSpend: number;
+      maxSpend: number;
+      step: number;
+    }
+  | { kind: 'kid'; title: string; copy: string; birthCost: number }
+  | { kind: 'taunt'; title: string; copy: string };
+
+export type ChoiceInput =
+  | { action: 'dismiss' }
+  | { action: 'accept'; tierId?: HouseTierId | CarTierId; spend?: number };
+
 export type Ending = {
   result: 'win' | 'lose' | 'bankrupt';
   yearsPlayed: number;
@@ -41,6 +106,8 @@ export type Ending = {
   tax: number;
   afterTax: number;
   cashLeft: number;
+  homeEquity: number;
+  netWorth: number;
   realPurchasingPower: number;
   targetCorpusToday: number;
 };
@@ -55,12 +122,21 @@ export type GameState = {
   portfolioValue: number;
   investedAmount: number;     // cost basis for LTCG
   monthlySalary: number;
-  fixedExpenses: number;
+  livingExpenses: number;
+  rent: number;
   plannedSip: number;
   ltcgRate: number;           // starts 0.10
   pendingEvent: PendingEvent | null;
   pendingBoss: PendingBoss | null;
+  pendingChoice: PendingChoice | null;
   needsAnnualBoss: boolean;   // this month is a post-start July
+  loans: Loan[];
+  house: House | null;
+  married: boolean;
+  hasChild: boolean;
+  childMonths: number | null;
+  schoolStarted: boolean;
+  offered: OfferedFlags;
   ledger: LedgerEntry[];
   ledgerSeq: number;
   isPaused: boolean;          // player pause; modals also pause via phase

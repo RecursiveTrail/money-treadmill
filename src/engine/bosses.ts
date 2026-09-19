@@ -1,4 +1,4 @@
-import type { BossEffect, GameState, PendingBoss } from './types';
+import type { GameState, PendingBoss } from './types';
 
 const ROTATION: PendingBoss[] = [
   { id: 'hike-6', title: 'Breaking News: Increment', copy: 'Another increment. CTC hiked 6%. The treadmill speeds up.', effect: { type: 'salaryMul', factor: 1.06 } },
@@ -25,14 +25,23 @@ export function getAnnualBoss(yearsPlayed: number): PendingBoss {
   return ROTATION[(yearsPlayed - 4) % 6]!;
 }
 
-export function applyBossEffect(state: GameState, effect: BossEffect): GameState {
+export function applyBossEffect(state: GameState, boss: PendingBoss): GameState {
+  const effect = boss.effect;
   switch (effect.type) {
     case 'salaryMul':
       return { ...state, monthlySalary: Math.round(state.monthlySalary * effect.factor) };
-    case 'expenseAdd':
-      return { ...state, fixedExpenses: state.fixedExpenses + effect.amount };
+    case 'expenseAdd': {
+      if (boss.id === 'rent-spike' && state.rent > 0) {
+        return { ...state, rent: state.rent + effect.amount };
+      }
+      return { ...state, livingExpenses: state.livingExpenses + effect.amount };
+    }
     case 'expenseMul':
-      return { ...state, fixedExpenses: Math.round(state.fixedExpenses * effect.factor) };
+      return {
+        ...state,
+        livingExpenses: Math.round(state.livingExpenses * effect.factor),
+        rent: state.rent > 0 ? Math.round(state.rent * effect.factor) : 0,
+      };
     case 'setLtcg':
       return { ...state, ltcgRate: effect.rate };
     case 'oneShotBill':

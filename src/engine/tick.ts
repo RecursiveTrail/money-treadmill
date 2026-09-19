@@ -74,7 +74,7 @@ export function applyBossAndFinish(state: GameState): GameState {
   if (!boss) {
     return state;
   }
-  let next = applyBossEffect(state, boss.effect);
+  let next = applyBossEffect(state, boss);
   if (boss.effect.type === 'oneShotBill') {
     next = payBill(next, boss.effect.amount, boss.title);
   }
