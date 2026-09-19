@@ -135,7 +135,36 @@ function maybeCar(state: GameState): GameState {
 }
 
 function maybeTaunt(state: GameState): GameState {
-  return state;
+  if (
+    (state.ageMonths !== 0 && state.ageMonths !== 6) ||
+    (state.yearsPlayed === 0 && state.ageMonths === 0)
+  ) {
+    return state;
+  }
+
+  const lines = [
+    !state.house && 'Ghar kab le rahe ho? Rent receipt is not an heirloom.',
+    state.ageYears >= 27 &&
+      !state.married &&
+      'Shaadi kab kar rahe ho? Relatives have formed a committee.',
+    state.married &&
+      !state.hasChild &&
+      'Bacche kab? Your mother forwarded a baby reel.',
+    !state.ownedCar && 'Car kab? Cab receipts do not impress the colony.',
+  ].filter((line): line is string => Boolean(line));
+
+  if (lines.length === 0) {
+    return state;
+  }
+  return {
+    ...state,
+    pendingChoice: {
+      kind: 'taunt',
+      title: 'Log kya kahenge?',
+      copy: lines.join('\n'),
+    },
+    phase: 'awaitingChoice',
+  };
 }
 
 export function maybeChoice(state: GameState): GameState {
@@ -210,6 +239,9 @@ export function applyChoice(state: GameState, input: ChoiceInput): GameState {
     return state;
   }
   if (input.action === 'dismiss') {
+    return { ...state, pendingChoice: null, phase: 'playing' };
+  }
+  if (state.pendingChoice.kind === 'taunt') {
     return { ...state, pendingChoice: null, phase: 'playing' };
   }
   if (state.pendingChoice.kind === 'house') {

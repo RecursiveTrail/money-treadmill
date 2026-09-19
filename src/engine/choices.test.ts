@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETUP } from './defaults';
-import { maybeChoice, openChoice } from './choices';
+import { applyChoice, maybeChoice, openChoice } from './choices';
 import { homeEquity, liveNetWorth } from './netWorth';
 import { startGame } from './state';
 import { finishMonth, resolveChoice, tick } from './tick';
@@ -258,5 +258,72 @@ describe('marriage and kid', () => {
     expect(s.childMonths).toBe(36);
     expect(s.schoolStarted).toBe(true);
     expect(s.livingExpenses).toBe(52_000);
+  });
+});
+
+describe('taunts', () => {
+  it('does not debit cash in January when still renting', () => {
+    const s = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageMonths: 6,
+      yearsPlayed: 0,
+      cashBuffer: 50_000,
+      offered: { house: true, car: true, marriage: true, kid: true },
+    });
+    expect(s.pendingChoice).toEqual({
+      kind: 'taunt',
+      title: 'Log kya kahenge?',
+      copy: [
+        'Ghar kab le rahe ho? Rent receipt is not an heirloom.',
+        'Car kab? Cab receipts do not impress the colony.',
+      ].join('\n'),
+    });
+
+    const next = applyChoice(s, { action: 'dismiss' });
+    expect(next.cashBuffer).toBe(50_000);
+    expect(next.phase).toBe('playing');
+    expect(next.pendingChoice).toBeNull();
+  });
+
+  it('does not taunt opening July', () => {
+    const s = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      offered: { house: true, car: true, marriage: true, kid: true },
+    });
+    expect(s.pendingChoice).toBeNull();
+  });
+
+  it('does not steal the slot when house is newly payable', () => {
+    const s = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageMonths: 6,
+      cashBuffer: 16_00_000,
+      offered: { house: false, car: true, marriage: true, kid: true },
+    });
+    expect(s.pendingChoice?.kind).toBe('house');
+  });
+
+  it('includes marriage and child copy when those milestones are missing', () => {
+    const unmarried = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageYears: 27,
+      ageMonths: 6,
+      house: { tierId: 'bhk2', purchasePrice: 80_00_000, currentValue: 80_00_000 },
+      ownedCar: true,
+      offered: { house: true, car: true, marriage: true, kid: true },
+    });
+    expect(unmarried.pendingChoice?.copy).toBe(
+      'Shaadi kab kar rahe ho? Relatives have formed a committee.',
+    );
+
+    const married = maybeChoice({
+      ...unmarried,
+      phase: 'playing',
+      pendingChoice: null,
+      married: true,
+    });
+    expect(married.pendingChoice?.copy).toBe(
+      'Bacche kab? Your mother forwarded a baby reel.',
+    );
   });
 });

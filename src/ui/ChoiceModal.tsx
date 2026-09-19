@@ -99,7 +99,24 @@ export function ChoiceModal() {
   }
 
   if (pendingChoice.kind === 'taunt') {
-    return null;
+    return (
+      <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-950/70 md:p-4">
+        <div className="h-full w-full max-w-md overflow-y-auto border-amber-500 bg-slate-900 p-6 md:h-auto md:rounded-lg md:border">
+          <p className="bg-amber-500 px-3 py-1 text-sm font-semibold uppercase tracking-wide text-slate-950">
+            Family WhatsApp
+          </p>
+          <h2 className="mt-4 text-xl font-semibold">{pendingChoice.title}</h2>
+          <p className="mt-2 whitespace-pre-line text-slate-300">{pendingChoice.copy}</p>
+          <button
+            type="button"
+            className="mt-6 min-h-11 w-full rounded bg-amber-500 px-4 py-2 font-medium text-slate-950"
+            onClick={() => resolveChoice({ action: 'dismiss' })}
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const isHouse = pendingChoice.kind === 'house';
