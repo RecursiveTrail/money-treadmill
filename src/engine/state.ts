@@ -30,6 +30,7 @@ export function startGame(setup: SetupConfig): GameState {
     needsAnnualBoss: false,
     loans: [],
     house: null,
+    ownedCar: false,
     married: false,
     hasChild: false,
     childMonths: null,

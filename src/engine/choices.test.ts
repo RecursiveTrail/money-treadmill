@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETUP } from './defaults';
 import { maybeChoice, openChoice } from './choices';
+import { homeEquity, liveNetWorth } from './netWorth';
 import { startGame } from './state';
 import { resolveChoice, tick } from './tick';
 
@@ -13,6 +14,7 @@ describe('house choice', () => {
       ...startGame(DEFAULT_SETUP),
       cashBuffer: 1_00_000,
       portfolioValue: 1_00_000,
+      ownedCar: true,
     });
     expect(s.pendingChoice).toBeNull();
     expect(openChoice(s, 'house').phase).toBe(s.phase);
@@ -73,7 +75,11 @@ describe('house choice', () => {
   });
 
   it('does not auto-pause every month after dismiss, but July reminder does', () => {
-    let s = maybeChoice({ ...startGame(DEFAULT_SETUP), cashBuffer: 16_00_000 });
+    let s = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      cashBuffer: 16_00_000,
+      ownedCar: true,
+    });
     s = resolveChoice(s, { action: 'dismiss' }, noopRng);
     const again = maybeChoice({ ...s, phase: 'playing', cashBuffer: 16_00_000 });
     expect(again.phase).not.toBe('awaitingChoice');
@@ -101,5 +107,48 @@ describe('house choice', () => {
   it('tick is a no-op in awaitingChoice', () => {
     const paused = maybeChoice({ ...startGame(DEFAULT_SETUP), cashBuffer: 16_00_000 });
     expect(tick(paused, neverEvent)).toEqual(paused);
+  });
+});
+
+describe('car choice', () => {
+  it('unlocks used when 1L down is payable and does not add car value to net worth', () => {
+    const paused = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      cashBuffer: 1_00_000,
+      plannedSip: 0,
+      offered: { house: true, car: false, marriage: false, kid: false },
+      house: { tierId: 'bhk2', purchasePrice: 80_00_000, currentValue: 80_00_000 },
+      rent: 0,
+    });
+    expect(paused.pendingChoice?.kind).toBe('car');
+    const next = resolveChoice(paused, { action: 'accept', tierId: 'used' }, noopRng);
+    expect(next.ownedCar).toBe(true);
+    expect(next.loans.some((loan) => loan.kind === 'car' && loan.emi === 8_499)).toBe(true);
+    expect(liveNetWorth(next)).toBe(next.portfolioValue + next.cashBuffer + homeEquity(next));
+  });
+
+  it('dismisses a car with no loan and July reminder after dismiss', () => {
+    const paused = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      cashBuffer: 1_00_000,
+      plannedSip: 0,
+      offered: { house: true, car: false, marriage: false, kid: false },
+      house: { tierId: 'bhk2', purchasePrice: 80_00_000, currentValue: 80_00_000 },
+      rent: 0,
+    });
+    expect(paused.pendingChoice?.kind).toBe('car');
+    const dismissed = resolveChoice(paused, { action: 'dismiss' }, noopRng);
+    expect(dismissed.ownedCar).toBe(false);
+    expect(dismissed.loans.some((loan) => loan.kind === 'car')).toBe(false);
+    const midYear = maybeChoice({ ...dismissed, phase: 'playing', cashBuffer: 1_00_000 });
+    expect(midYear.pendingChoice).toBeNull();
+    const july = maybeChoice({
+      ...dismissed,
+      phase: 'playing',
+      cashBuffer: 1_00_000,
+      ageMonths: 0,
+      yearsPlayed: 1,
+    });
+    expect(july.pendingChoice?.kind).toBe('car');
   });
 });

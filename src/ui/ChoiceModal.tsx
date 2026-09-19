@@ -1,5 +1,5 @@
-import { HOME_ANNUAL_RATE, HOME_YEARS } from '../engine/defaults';
-import { HOUSE_TIERS } from '../engine/choices';
+import { CAR_TIERS, HOUSE_TIERS } from '../engine/choices';
+import { CAR_ANNUAL_RATE, CAR_YEARS, HOME_ANNUAL_RATE, HOME_YEARS } from '../engine/defaults';
 import { downPayment, emi } from '../engine/loans';
 import { formatInr } from '../lib/formatInr';
 import { useGameStore } from '../store/gameStore';
@@ -8,9 +8,14 @@ export function ChoiceModal() {
   const pendingChoice = useGameStore((s) => s.pendingChoice);
   const resolveChoice = useGameStore((s) => s.resolveChoice);
 
-  if (pendingChoice?.kind !== 'house') {
+  if (pendingChoice?.kind !== 'house' && pendingChoice?.kind !== 'car') {
     return null;
   }
+
+  const isHouse = pendingChoice.kind === 'house';
+  const tiers = isHouse ? HOUSE_TIERS : CAR_TIERS;
+  const annualRate = isHouse ? HOME_ANNUAL_RATE : CAR_ANNUAL_RATE;
+  const years = isHouse ? HOME_YEARS : CAR_YEARS;
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-950/70 md:p-4">
@@ -21,10 +26,10 @@ export function ChoiceModal() {
         <h2 className="mt-4 text-xl font-semibold">{pendingChoice.title}</h2>
         <p className="mt-2 text-slate-300">{pendingChoice.copy}</p>
         <div className="mt-6 space-y-3">
-          {HOUSE_TIERS.map((tier) => {
+          {tiers.map((tier) => {
             const down = downPayment(tier.price);
-            const monthlyEmi = emi(tier.price - down, HOME_ANNUAL_RATE, HOME_YEARS);
-            const payable = pendingChoice.payableTierIds.includes(tier.id);
+            const monthlyEmi = emi(tier.price - down, annualRate, years);
+            const payable = pendingChoice.payableTierIds.some((id) => id === tier.id);
             return (
               <div key={tier.id} className="rounded border border-slate-700 p-4">
                 <div className="grid gap-3">
@@ -53,7 +58,7 @@ export function ChoiceModal() {
           className="mt-6 min-h-11 w-full rounded bg-slate-700 px-4 py-2 font-medium text-white"
           onClick={() => resolveChoice({ action: 'dismiss' })}
         >
-          Keep renting
+          {isHouse ? 'Keep renting' : 'Not now'}
         </button>
       </div>
     </div>

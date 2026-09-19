@@ -132,6 +132,7 @@ export type GameState = {
   needsAnnualBoss: boolean;   // this month is a post-start July
   loans: Loan[];
   house: House | null;
+  ownedCar: boolean;
   married: boolean;
   hasChild: boolean;
   childMonths: number | null;

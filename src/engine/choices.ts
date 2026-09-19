@@ -1,8 +1,8 @@
-import { HOME_ANNUAL_RATE, HOME_YEARS } from './defaults';
+import { CAR_ANNUAL_RATE, CAR_YEARS, HOME_ANNUAL_RATE, HOME_YEARS } from './defaults';
 import { payBill } from './economy';
 import { canAffordDownPayment, downPayment, originateLoan } from './loans';
 import { pushLedger } from './state';
-import type { ChoiceInput, ChoiceKind, GameState, HouseTierId } from './types';
+import type { CarTierId, ChoiceInput, ChoiceKind, GameState, HouseTierId } from './types';
 
 export const HOUSE_TIERS = [
   { id: 'bhk2' as const, label: '2 BHK', price: 80_00_000 },
@@ -10,8 +10,20 @@ export const HOUSE_TIERS = [
   { id: 'premium' as const, label: 'Premium 3 BHK', price: 1_60_00_000 },
 ];
 
+export const CAR_TIERS = [
+  { id: 'used' as const, label: 'Used', price: 5_00_000 },
+  { id: 'new' as const, label: 'New', price: 10_00_000 },
+  { id: 'suv' as const, label: 'SUV', price: 20_00_000 },
+];
+
 export function payableHouseTiers(state: GameState): HouseTierId[] {
   return HOUSE_TIERS.filter((tier) =>
+    canAffordDownPayment(state.cashBuffer, state.portfolioValue, tier.price),
+  ).map((tier) => tier.id);
+}
+
+export function payableCarTiers(state: GameState): CarTierId[] {
+  return CAR_TIERS.filter((tier) =>
     canAffordDownPayment(state.cashBuffer, state.portfolioValue, tier.price),
   ).map((tier) => tier.id);
 }
@@ -53,6 +65,22 @@ function maybeHouse(state: GameState): GameState {
 }
 
 function maybeCar(state: GameState): GameState {
+  if (state.ownedCar || !payableCarTiers(state).includes('used')) {
+    return state;
+  }
+  if (!state.offered.car || (state.ageMonths === 0 && state.yearsPlayed > 0)) {
+    return {
+      ...state,
+      pendingChoice: {
+        kind: 'car',
+        title: 'Gaadi le lo',
+        copy: 'The colony has noticed your cab receipts. Pick an EMI with wheels.',
+        payableTierIds: payableCarTiers(state),
+      },
+      phase: 'awaitingChoice',
+      offered: { ...state.offered, car: true },
+    };
+  }
   return state;
 }
 
@@ -82,6 +110,19 @@ export function openChoice(state: GameState, kind: ChoiceKind): GameState {
   if (kind === 'house' && !state.house && payableHouseTiers(state).length > 0) {
     return housePending(state);
   }
+  if (kind === 'car' && !state.ownedCar && payableCarTiers(state).length > 0) {
+    return {
+      ...state,
+      pendingChoice: {
+        kind: 'car',
+        title: 'Gaadi le lo',
+        copy: 'The colony has noticed your cab receipts. Pick an EMI with wheels.',
+        payableTierIds: payableCarTiers(state),
+      },
+      phase: 'awaitingChoice',
+      offered: { ...state.offered, car: true },
+    };
+  }
   return state;
 }
 
@@ -92,27 +133,48 @@ export function applyChoice(state: GameState, input: ChoiceInput): GameState {
   if (input.action === 'dismiss') {
     return { ...state, pendingChoice: null, phase: 'playing' };
   }
-  if (state.pendingChoice.kind !== 'house') {
-    return state;
-  }
-  const tier = HOUSE_TIERS.find((row) => row.id === input.tierId);
-  if (!tier || !payableHouseTiers(state).includes(tier.id)) {
-    return state;
-  }
+  if (state.pendingChoice.kind === 'house') {
+    const tier = HOUSE_TIERS.find((row) => row.id === input.tierId);
+    if (!tier || !payableHouseTiers(state).includes(tier.id) || state.house) {
+      return state;
+    }
 
-  const down = downPayment(tier.price);
-  let next = payBill(state, down, `Home down payment · ${tier.label}`);
-  if (next.phase === 'ended') {
-    return { ...next, pendingChoice: null };
+    const down = downPayment(tier.price);
+    let next = payBill(state, down, `Home down payment · ${tier.label}`);
+    if (next.phase === 'ended') {
+      return { ...next, pendingChoice: null };
+    }
+    const principal = tier.price - down;
+    next = {
+      ...next,
+      pendingChoice: null,
+      phase: 'playing',
+      rent: 0,
+      house: { tierId: tier.id, purchasePrice: tier.price, currentValue: tier.price },
+      loans: [...next.loans, originateLoan('home', principal, HOME_ANNUAL_RATE, HOME_YEARS)],
+    };
+    return pushLedger(next, 'choice', `Bought ${tier.label}`, 0);
   }
-  const principal = tier.price - down;
-  next = {
-    ...next,
-    pendingChoice: null,
-    phase: 'playing',
-    rent: 0,
-    house: { tierId: tier.id, purchasePrice: tier.price, currentValue: tier.price },
-    loans: [...next.loans, originateLoan('home', principal, HOME_ANNUAL_RATE, HOME_YEARS)],
-  };
-  return pushLedger(next, 'choice', `Bought ${tier.label}`, 0);
+  if (state.pendingChoice.kind === 'car') {
+    const tier = CAR_TIERS.find((row) => row.id === input.tierId);
+    if (!tier || !payableCarTiers(state).includes(tier.id) || state.ownedCar) {
+      return state;
+    }
+
+    const down = downPayment(tier.price);
+    let next = payBill(state, down, `Car down payment · ${tier.label}`);
+    if (next.phase === 'ended') {
+      return { ...next, pendingChoice: null };
+    }
+    const principal = tier.price - down;
+    next = {
+      ...next,
+      pendingChoice: null,
+      phase: 'playing',
+      ownedCar: true,
+      loans: [...next.loans, originateLoan('car', principal, CAR_ANNUAL_RATE, CAR_YEARS)],
+    };
+    return pushLedger(next, 'choice', `Bought ${tier.label} car`, 0);
+  }
+  return state;
 }

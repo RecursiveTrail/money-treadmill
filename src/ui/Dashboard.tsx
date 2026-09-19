@@ -1,6 +1,6 @@
 import { Pause, Play } from 'lucide-react';
 import { ageLabel, monthLabel } from '../engine/calendar';
-import { payableHouseTiers } from '../engine/choices';
+import { payableCarTiers, payableHouseTiers } from '../engine/choices';
 import { emergencyTarget, liveNetWorth } from '../engine/netWorth';
 import { formatInr } from '../lib/formatInr';
 import { useGameStore } from '../store/gameStore';
@@ -29,6 +29,9 @@ export function Dashboard() {
   const target = useGameStore(emergencyTarget);
   const canOpenHouse = useGameStore(
     (s) => !s.house && payableHouseTiers(s).length > 0,
+  );
+  const canOpenCar = useGameStore(
+    (s) => !s.ownedCar && payableCarTiers(s).length > 0,
   );
   const monthlySalary = useGameStore((s) => s.monthlySalary);
   const livingExpenses = useGameStore((s) => s.livingExpenses);
@@ -109,6 +112,15 @@ export function Dashboard() {
               onClick={() => openChoice('house')}
             >
               House
+            </button>
+          )}
+          {canOpenCar && (
+            <button
+              type="button"
+              className="mt-4 min-h-11 w-full rounded bg-amber-500 px-3 font-medium text-[var(--app-bg)] sm:ml-2 sm:w-auto"
+              onClick={() => openChoice('car')}
+            >
+              Car
             </button>
           )}
         </div>

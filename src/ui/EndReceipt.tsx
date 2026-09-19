@@ -4,6 +4,7 @@ import { useGameStore } from '../store/gameStore';
 export function EndReceipt() {
   const ending = useGameStore((s) => s.ending);
   const house = useGameStore((s) => s.house);
+  const ownedCar = useGameStore((s) => s.ownedCar);
   const reset = useGameStore((s) => s.resetToSetup);
   if (!ending) {
     return null;
@@ -55,6 +56,7 @@ export function EndReceipt() {
           </dd>
         </div>
       </dl>
+      {ownedCar && <p className="mt-3 text-sm text-slate-400">Car does not count.</p>}
       <button type="button" className="mt-8 rounded bg-emerald-500 px-4 py-2 text-slate-950" onClick={reset}>
         Play again
       </button>
