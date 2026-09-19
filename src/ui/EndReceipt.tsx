@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 
 export function EndReceipt() {
   const ending = useGameStore((s) => s.ending);
+  const house = useGameStore((s) => s.house);
   const reset = useGameStore((s) => s.resetToSetup);
   if (!ending) {
     return null;
@@ -32,6 +33,18 @@ export function EndReceipt() {
           <dd>{formatInr(ending.afterTax)}</dd>
         </div>
         <div className="flex justify-between">
+          <dt>Cash</dt>
+          <dd>{formatInr(ending.cashLeft)}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt>{house ? 'Home equity' : 'Rented'}</dt>
+          <dd>{house ? formatInr(ending.homeEquity) : '—'}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt>Net worth</dt>
+          <dd className="text-emerald-400">{formatInr(ending.netWorth)}</dd>
+        </div>
+        <div className="flex justify-between">
           <dt>Inflation 7% × {ending.yearsPlayed} years</dt>
           <dd className="text-rose-400">{formatInr(ending.realPurchasingPower)}</dd>
         </div>
@@ -42,9 +55,6 @@ export function EndReceipt() {
           </dd>
         </div>
       </dl>
-      <p className="mt-4 text-sm text-slate-500">
-        Cash left in the buffer (not counted): {formatInr(ending.cashLeft)}
-      </p>
       <button type="button" className="mt-8 rounded bg-emerald-500 px-4 py-2 text-slate-950" onClick={reset}>
         Play again
       </button>
