@@ -49,4 +49,21 @@ describe('transferToMarket', () => {
     const state = startGame(DEFAULT_SETUP);
     expect(transferToMarket(state, -1)).toBe(state);
   });
+
+  it('no-ops during setup and ended phases', () => {
+    const base = {
+      ...startGame(DEFAULT_SETUP),
+      cashBuffer: 50_000,
+      portfolioValue: 10_000,
+      investedAmount: 10_000,
+    };
+    for (const phase of ['setup', 'ended'] as const) {
+      const state = { ...base, phase };
+      const next = transferToMarket(state, 20_000);
+      expect(next).toBe(state);
+      expect(next.cashBuffer).toBe(50_000);
+      expect(next.portfolioValue).toBe(10_000);
+      expect(next.investedAmount).toBe(10_000);
+    }
+  });
 });

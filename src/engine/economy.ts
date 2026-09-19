@@ -116,6 +116,9 @@ export function applySip(state: GameState): GameState {
 }
 
 export function transferToMarket(state: GameState, amount: number): GameState {
+  if (state.phase === 'setup' || state.phase === 'ended') {
+    return state;
+  }
   const moved = Math.max(0, Math.min(Math.round(amount), state.cashBuffer));
   if (moved === 0) {
     return state;
