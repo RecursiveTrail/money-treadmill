@@ -68,7 +68,10 @@ function housePending(state: GameState): GameState {
 }
 
 function maybeMarriage(state: GameState): GameState {
-  if (state.ageYears < 30 || state.married || state.offered.marriage) {
+  if (state.ageYears < 30 || state.married) {
+    return state;
+  }
+  if (state.offered.marriage && (state.ageMonths !== 0 || state.yearsPlayed === 0)) {
     return state;
   }
   return {
@@ -88,7 +91,10 @@ function maybeMarriage(state: GameState): GameState {
 }
 
 function maybeKid(state: GameState): GameState {
-  if (!state.married || state.hasChild || state.offered.kid) {
+  if (!state.married || state.hasChild) {
+    return state;
+  }
+  if (state.offered.kid && (state.ageMonths !== 0 || state.yearsPlayed === 0)) {
     return state;
   }
   return {

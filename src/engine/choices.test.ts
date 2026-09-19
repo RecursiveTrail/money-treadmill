@@ -208,6 +208,31 @@ describe('marriage and kid', () => {
     expect(next).toEqual(paused);
   });
 
+  it('reminds about dismissed marriage in July but not mid-year', () => {
+    const paused = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageYears: 30,
+      ageMonths: 4,
+    });
+    expect(paused.pendingChoice?.kind).toBe('marriage');
+
+    const dismissed = resolveChoice(paused, { action: 'dismiss' }, noopRng);
+    const midYear = maybeChoice({
+      ...dismissed,
+      phase: 'playing',
+      ageMonths: 5,
+    });
+    expect(midYear.pendingChoice).toBeNull();
+
+    const july = maybeChoice({
+      ...dismissed,
+      phase: 'playing',
+      ageMonths: 0,
+      yearsPlayed: 1,
+    });
+    expect(july.pendingChoice?.kind).toBe('marriage');
+  });
+
   it('offers a kid the month after marriage, not in the wedding resolution', () => {
     const paused = maybeChoice({
       ...startGame(DEFAULT_SETUP),
@@ -225,6 +250,33 @@ describe('marriage and kid', () => {
 
     const nextMonth = maybeChoice({ ...married, phase: 'playing' });
     expect(nextMonth.pendingChoice?.kind).toBe('kid');
+  });
+
+  it('reminds about a dismissed kid in July but not mid-year', () => {
+    const paused = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageYears: 30,
+      ageMonths: 4,
+      married: true,
+      offered: { house: true, car: true, marriage: true, kid: false },
+    });
+    expect(paused.pendingChoice?.kind).toBe('kid');
+
+    const dismissed = resolveChoice(paused, { action: 'dismiss' }, noopRng);
+    const midYear = maybeChoice({
+      ...dismissed,
+      phase: 'playing',
+      ageMonths: 5,
+    });
+    expect(midYear.pendingChoice).toBeNull();
+
+    const july = maybeChoice({
+      ...dismissed,
+      phase: 'playing',
+      ageMonths: 0,
+      yearsPlayed: 1,
+    });
+    expect(july.pendingChoice?.kind).toBe('kid');
   });
 
   it('charges for birth, raises living costs, and starts school at child month 36', () => {
