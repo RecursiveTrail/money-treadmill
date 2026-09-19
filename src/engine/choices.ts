@@ -65,9 +65,13 @@ export function maybeChoice(state: GameState): GameState {
     return state;
   }
   let next = maybeMarriage(state);
+  if (next.phase === 'awaitingChoice') return next;
   next = maybeKid(next);
+  if (next.phase === 'awaitingChoice') return next;
   next = maybeHouse(next);
+  if (next.phase === 'awaitingChoice') return next;
   next = maybeCar(next);
+  if (next.phase === 'awaitingChoice') return next;
   return maybeTaunt(next);
 }
 

@@ -121,6 +121,9 @@ export function payPending(state: GameState, rng: Rng): GameState {
 }
 
 export function resolveChoice(state: GameState, input: ChoiceInput, rng: Rng): GameState {
+  if (state.phase !== 'awaitingChoice' || !state.pendingChoice) {
+    return state;
+  }
   const applied = applyChoice(state, input);
   if (applied.phase === 'ended' || applied.phase === 'awaitingChoice') {
     return applied;

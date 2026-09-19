@@ -24,6 +24,11 @@ describe('tick', () => {
     expect(tick(setup, alwaysEvent)).toEqual(setup);
   });
 
+  it('resolveChoice is a no-op without a pending choice', () => {
+    const playing = startGame(DEFAULT_SETUP);
+    expect(resolveChoice(playing, { action: 'dismiss' }, neverEvent)).toEqual(playing);
+  });
+
   it('schedules an event when rng < 0.30 and never when rng >= 0.30', () => {
     const opened = tick(startGame(DEFAULT_SETUP), alwaysEvent);
     expect(opened.phase).toBe('awaitingEvent');
