@@ -24,6 +24,20 @@ describe('applyPaycheck', () => {
     expect(next.portfolioValue).toBe(100_000 - 30_000 - 6_000);
     expect(next.phase).not.toBe('ended');
   });
+
+  it('ledger lists living and rent expenses separately on default split', () => {
+    const next = applyPaycheck(withCash(10_000));
+    const living = next.ledger.find((e) => e.text === 'Living expenses');
+    const rent = next.ledger.find((e) => e.text === 'Rent');
+    expect(living?.amount).toBe(-30_000);
+    expect(rent?.amount).toBe(-25_000);
+  });
+
+  it('omits rent ledger line when rent is zero', () => {
+    const next = applyPaycheck({ ...withCash(10_000), rent: 0, livingExpenses: 55_000 });
+    expect(next.ledger.some((e) => e.text === 'Rent')).toBe(false);
+    expect(next.ledger.find((e) => e.text === 'Living expenses')?.amount).toBe(-55_000);
+  });
 });
 
 describe('payBill', () => {

@@ -21,3 +21,39 @@ describe('getAnnualBoss', () => {
     expect(getAnnualBoss(10).id).toBe('hike-6');
   });
 });
+
+describe('applyBossEffect rent-spike and expenseMul', () => {
+  it('year-3 rent-spike adds 2000 to rent when rent > 0', () => {
+    const boss = getAnnualBoss(3);
+    expect(boss.id).toBe('rent-spike');
+    const base = { ...startGame(DEFAULT_SETUP), livingExpenses: 30_000, rent: 25_000 };
+    const next = applyBossEffect(base, boss);
+    expect(next.rent).toBe(27_000);
+    expect(next.livingExpenses).toBe(30_000);
+  });
+
+  it('year-3 rent-spike adds 2000 to living when rent is 0', () => {
+    const boss = getAnnualBoss(3);
+    const base = { ...startGame(DEFAULT_SETUP), livingExpenses: 55_000, rent: 0 };
+    const next = applyBossEffect(base, boss);
+    expect(next.rent).toBe(0);
+    expect(next.livingExpenses).toBe(57_000);
+  });
+
+  it('cpi-5 rounds living and rent independently when rent > 0', () => {
+    const boss = getAnnualBoss(5);
+    expect(boss.id).toBe('cpi-5');
+    const base = { ...startGame(DEFAULT_SETUP), livingExpenses: 30_000, rent: 25_000 };
+    const next = applyBossEffect(base, boss);
+    expect(next.livingExpenses).toBe(Math.round(30_000 * 1.05));
+    expect(next.rent).toBe(Math.round(25_000 * 1.05));
+  });
+
+  it('cpi-5 rounds living only and keeps rent at 0 when rent is 0', () => {
+    const boss = getAnnualBoss(5);
+    const base = { ...startGame(DEFAULT_SETUP), livingExpenses: 55_000, rent: 0 };
+    const next = applyBossEffect(base, boss);
+    expect(next.livingExpenses).toBe(Math.round(55_000 * 1.05));
+    expect(next.rent).toBe(0);
+  });
+});
