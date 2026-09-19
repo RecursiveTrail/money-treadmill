@@ -41,13 +41,19 @@ export function amortize(loan: Loan): Loan | null {
   return { ...loan, principalRemaining, monthsRemaining };
 }
 
-export function canAffordDownPayment(cash: number, portfolio: number, price: number): boolean {
-  const down = downPayment(price);
-  if (cash >= down) {
+export function canPayFromBalance(cash: number, portfolio: number, amount: number): boolean {
+  if (amount <= 0) {
     return true;
   }
-  const shortfall = down - cash;
+  if (cash >= amount) {
+    return true;
+  }
+  const shortfall = amount - cash;
   return portfolio >= Math.round(shortfall * (1 + STCG_RATE));
+}
+
+export function canAffordDownPayment(cash: number, portfolio: number, price: number): boolean {
+  return canPayFromBalance(cash, portfolio, downPayment(price));
 }
 
 export function homePrincipal(loans: Loan[]): number {

@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { CAR_ANNUAL_RATE, CAR_YEARS, HOME_ANNUAL_RATE, HOME_YEARS } from './defaults';
-import { amortize, canAffordDownPayment, downPayment, emi, homePrincipal, originateLoan } from './loans';
+import {
+  amortize,
+  canAffordDownPayment,
+  canPayFromBalance,
+  downPayment,
+  emi,
+  homePrincipal,
+  originateLoan,
+} from './loans';
 
 describe('emi', () => {
   it('matches the spec table for the 2 BHK loan', () => {
@@ -14,6 +22,21 @@ describe('emi', () => {
     expect(emi(4_00_000, CAR_ANNUAL_RATE, CAR_YEARS)).toBe(8_499);
     expect(emi(8_00_000, CAR_ANNUAL_RATE, CAR_YEARS)).toBe(16_998);
     expect(emi(16_00_000, CAR_ANNUAL_RATE, CAR_YEARS)).toBe(33_995);
+  });
+});
+
+describe('canPayFromBalance', () => {
+  it('is true when cash covers the amount', () => {
+    expect(canPayFromBalance(2_00_000, 0, 2_00_000)).toBe(true);
+  });
+
+  it('counts STCG haircut on the shortfall', () => {
+    expect(canPayFromBalance(1_00_000, 1_20_000, 2_00_000)).toBe(true);
+    expect(canPayFromBalance(1_00_000, 1_19_999, 2_00_000)).toBe(false);
+  });
+
+  it('is true for non-positive amount', () => {
+    expect(canPayFromBalance(0, 0, 0)).toBe(true);
   });
 });
 
