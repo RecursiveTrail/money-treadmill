@@ -224,21 +224,40 @@ describe('marriage and kid', () => {
     ).toBe(true);
   });
 
-  it('keeps an unaffordable wedding awaiting a choice', () => {
-    const paused = maybeChoice({
+  it('does not offer shaadi until the wedding floor is payable', () => {
+    const s = maybeChoice({
       ...startGame(DEFAULT_SETUP),
       ageYears: 30,
       cashBuffer: 1_00_000,
       portfolioValue: 0,
-      plannedSip: 0,
+      ownedCar: true,
     });
-    expect(paused.pendingChoice?.kind).toBe('marriage');
-    const next = resolveChoice(
-      paused,
-      { action: 'accept', spend: 8_00_000 },
-      noopRng,
-    );
-    expect(next).toEqual(paused);
+    expect(s.pendingChoice).toBeNull();
+    expect(openChoice(s, 'marriage').phase).toBe('playing');
+  });
+
+  it('offers shaadi once cash plus STCG cover the floor', () => {
+    const s = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageYears: 30,
+      cashBuffer: 2_00_000,
+      ownedCar: true,
+    });
+    expect(s.pendingChoice?.kind).toBe('marriage');
+  });
+
+  it('does not offer a kid until the birth bill is payable', () => {
+    const s = maybeChoice({
+      ...startGame(DEFAULT_SETUP),
+      ageYears: 30,
+      married: true,
+      cashBuffer: 50_000,
+      portfolioValue: 0,
+      ownedCar: true,
+      offered: { house: true, car: true, marriage: true, kid: false },
+    });
+    expect(s.pendingChoice).toBeNull();
+    expect(openChoice(s, 'kid').phase).toBe('playing');
   });
 
   it('reminds about dismissed marriage in July but not mid-year', () => {
@@ -246,6 +265,8 @@ describe('marriage and kid', () => {
       ...startGame(DEFAULT_SETUP),
       ageYears: 30,
       ageMonths: 4,
+      cashBuffer: 20_00_000,
+      offered: { house: true, car: true, marriage: false, kid: false },
     });
     expect(paused.pendingChoice?.kind).toBe('marriage');
 
@@ -254,6 +275,7 @@ describe('marriage and kid', () => {
       ...dismissed,
       phase: 'playing',
       ageMonths: 5,
+      cashBuffer: 20_00_000,
     });
     expect(midYear.pendingChoice).toBeNull();
 
@@ -262,6 +284,7 @@ describe('marriage and kid', () => {
       phase: 'playing',
       ageMonths: 0,
       yearsPlayed: 1,
+      cashBuffer: 20_00_000,
     });
     expect(july.pendingChoice?.kind).toBe('marriage');
   });
@@ -291,6 +314,7 @@ describe('marriage and kid', () => {
       ageYears: 30,
       ageMonths: 4,
       married: true,
+      cashBuffer: 5_00_000,
       offered: { house: true, car: true, marriage: true, kid: false },
     });
     expect(paused.pendingChoice?.kind).toBe('kid');

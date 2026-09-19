@@ -11,7 +11,12 @@ import {
   WEDDING_STEP,
 } from './defaults';
 import { clampPlannedSip, payBill } from './economy';
-import { canAffordDownPayment, downPayment, originateLoan } from './loans';
+import {
+  canAffordDownPayment,
+  canPayFromBalance,
+  downPayment,
+  originateLoan,
+} from './loans';
 import { pushLedger } from './state';
 import type { CarTierId, ChoiceInput, ChoiceKind, GameState, HouseTierId } from './types';
 
@@ -72,6 +77,9 @@ function maybeMarriage(state: GameState): GameState {
   if (state.ageYears < 30 || state.married) {
     return state;
   }
+  if (!canPayFromBalance(state.cashBuffer, state.portfolioValue, WEDDING_MIN)) {
+    return state;
+  }
   if (state.offered.marriage && (state.ageMonths !== 0 || state.yearsPlayed === 0)) {
     return state;
   }
@@ -94,6 +102,9 @@ function maybeMarriage(state: GameState): GameState {
 
 function maybeKid(state: GameState): GameState {
   if (!state.married || state.hasChild) {
+    return state;
+  }
+  if (!canPayFromBalance(state.cashBuffer, state.portfolioValue, BIRTH_COST)) {
     return state;
   }
   if (state.offered.kid && (state.ageMonths !== 0 || state.yearsPlayed === 0)) {
@@ -214,7 +225,12 @@ export function openChoice(state: GameState, kind: ChoiceKind): GameState {
       offered: { ...state.offered, car: true },
     };
   }
-  if (kind === 'marriage' && state.ageYears >= 30 && !state.married) {
+  if (
+    kind === 'marriage' &&
+    state.ageYears >= 30 &&
+    !state.married &&
+    canPayFromBalance(state.cashBuffer, state.portfolioValue, WEDDING_MIN)
+  ) {
     return {
       ...state,
       pendingChoice: {
@@ -231,7 +247,12 @@ export function openChoice(state: GameState, kind: ChoiceKind): GameState {
       offered: { ...state.offered, marriage: true },
     };
   }
-  if (kind === 'kid' && state.married && !state.hasChild) {
+  if (
+    kind === 'kid' &&
+    state.married &&
+    !state.hasChild &&
+    canPayFromBalance(state.cashBuffer, state.portfolioValue, BIRTH_COST)
+  ) {
     return {
       ...state,
       pendingChoice: {
