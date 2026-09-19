@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETUP } from './defaults';
+import { sipCap } from './economy';
 import { startGame } from './state';
 import { applyBossAndFinish, payPending, resolveChoice, tick } from './tick';
 import type { GameState, Rng } from './types';
@@ -47,6 +48,16 @@ describe('tick', () => {
     expect(s.ageMonths).toBe(0);
     expect(s.yearsPlayed).toBe(1);
     expect(s.phase).toBe('playing');
+  });
+
+  it('clamps planned SIP to the next month cap after spending the buffer', () => {
+    const started = startGame(DEFAULT_SETUP);
+    const maxed = { ...started, plannedSip: sipCap(started) };
+
+    const next = tick(maxed, neverEvent);
+
+    expect(next.phase).toBe('playing');
+    expect(next.plannedSip).toBe(sipCap(next));
   });
 
   it('ends after 240 completed default months with yearsPlayed 20', () => {

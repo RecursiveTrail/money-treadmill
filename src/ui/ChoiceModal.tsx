@@ -31,11 +31,11 @@ export function ChoiceModal() {
     return (
       <div
         className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4"
-        onClick={closeChoicePicker}
+        onMouseDown={closeChoicePicker}
       >
         <div
-          className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border"
-          onClick={(event) => event.stopPropagation()}
+          className="h-full max-h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border"
+          onMouseDown={(event) => event.stopPropagation()}
         >
           <button
             type="button"
@@ -95,11 +95,11 @@ export function ChoiceModal() {
   return (
     <div
       className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4"
-      onClick={closeChoicePicker}
+      onMouseDown={closeChoicePicker}
     >
       <div
-        className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border"
-        onClick={(event) => event.stopPropagation()}
+        className="h-full max-h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border"
+        onMouseDown={(event) => event.stopPropagation()}
       >
         <button
           type="button"

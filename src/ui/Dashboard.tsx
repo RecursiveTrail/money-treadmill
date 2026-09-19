@@ -32,19 +32,21 @@ export function Dashboard() {
   const netWorth = useGameStore(liveNetWorth);
   const target = useGameStore(emergencyTarget);
   const canOpenHouse = useGameStore(
-    (s) => !s.house && payableHouseTiers(s).length > 0,
+    (s) => s.phase === 'playing' && !s.house && payableHouseTiers(s).length > 0,
   );
   const canOpenCar = useGameStore(
-    (s) => !s.ownedCar && payableCarTiers(s).length > 0,
+    (s) => s.phase === 'playing' && !s.ownedCar && payableCarTiers(s).length > 0,
   );
   const canOpenMarriage = useGameStore(
     (s) =>
+      s.phase === 'playing' &&
       s.ageYears >= 30 &&
       !s.married &&
       canPayFromBalance(s.cashBuffer, s.portfolioValue, WEDDING_MIN),
   );
   const canOpenKid = useGameStore(
     (s) =>
+      s.phase === 'playing' &&
       s.married &&
       !s.hasChild &&
       canPayFromBalance(s.cashBuffer, s.portfolioValue, BIRTH_COST),
@@ -112,7 +114,7 @@ export function Dashboard() {
             <p className="text-[var(--muted)]">Rent: owned</p>
           )}
           {loans.map((loan) => (
-            <p key={`${loan.kind}-${loan.monthsRemaining}`} className="text-[var(--expense)]">
+            <p key={loan.kind} className="text-[var(--expense)]">
               {loan.kind === 'home' ? 'Home EMI' : 'Car EMI'} −{formatInr(loan.emi)}
             </p>
           ))}

@@ -61,11 +61,11 @@ export function finishMonth(state: GameState): GameState {
         `School fees begin (+₹${SCHOOL_LIVING_BUMP.toLocaleString('en-IN')}/month)`,
         0,
       );
-      bumped = clampPlannedSip(bumped);
     } else {
       bumped = { ...bumped, childMonths };
     }
   }
+  bumped = clampPlannedSip(bumped);
   if (ageYears === state.setup.targetRetirementAge && ageMonths === 0) {
     return {
       ...bumped,

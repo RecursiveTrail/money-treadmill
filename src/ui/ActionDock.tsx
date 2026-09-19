@@ -12,7 +12,7 @@ export function ActionDock() {
 
   if (phase === 'awaitingEvent' && pendingEvent) {
     return (
-      <section className="rounded-lg border border-[var(--expense)] bg-[var(--card)] p-4">
+      <section aria-live="polite" className="rounded-lg border border-[var(--expense)] bg-[var(--card)] p-4">
         <p className="text-xs uppercase tracking-wide text-[var(--expense)]">Life happens</p>
         <h2 className="mt-2 text-lg font-semibold">{pendingEvent.title}</h2>
         <p className="mt-1 text-[var(--muted)]">{pendingEvent.copy}</p>
@@ -30,7 +30,7 @@ export function ActionDock() {
   if (phase === 'awaitingBoss' && pendingBoss) {
     const bill = pendingBoss.effect.type === 'oneShotBill' ? pendingBoss.effect.amount : 0;
     return (
-      <section className="rounded-lg border border-[var(--expense)] bg-[var(--card)] p-4">
+      <section aria-live="polite" className="rounded-lg border border-[var(--expense)] bg-[var(--card)] p-4">
         <p className="text-xs uppercase tracking-wide text-[var(--expense)]">Breaking News</p>
         <h2 className="mt-2 text-lg font-semibold">{pendingBoss.title}</h2>
         <p className="mt-1 text-[var(--muted)]">{pendingBoss.copy}</p>
@@ -51,7 +51,7 @@ export function ActionDock() {
 
   if (pendingChoice.kind === 'taunt') {
     return (
-      <section className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+      <section aria-live="polite" className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
         <p className="text-xs uppercase tracking-wide text-[var(--muted)]">Family WhatsApp</p>
         <h2 className="mt-2 text-lg font-semibold">{pendingChoice.title}</h2>
         <p className="mt-1 whitespace-pre-line text-[var(--muted)]">{pendingChoice.copy}</p>
@@ -68,7 +68,7 @@ export function ActionDock() {
 
   if (pendingChoice.kind === 'kid') {
     return (
-      <section className="rounded-lg border border-[var(--money)] bg-[var(--card)] p-4">
+      <section aria-live="polite" className="rounded-lg border border-[var(--money)] bg-[var(--card)] p-4">
         <p className="text-xs uppercase tracking-wide text-[var(--money)]">Life choice</p>
         <h2 className="mt-2 text-lg font-semibold">{pendingChoice.title}</h2>
         <p className="mt-1 text-[var(--muted)]">{pendingChoice.copy}</p>
@@ -95,7 +95,7 @@ export function ActionDock() {
     pendingChoice.kind === 'house' ? 'Keep renting' : 'Not yet';
 
   return (
-    <section className="rounded-lg border border-[var(--money)] bg-[var(--card)] p-4">
+    <section aria-live="polite" className="rounded-lg border border-[var(--money)] bg-[var(--card)] p-4">
       <p className="text-xs uppercase tracking-wide text-[var(--money)]">Life choice</p>
       <h2 className="mt-2 text-lg font-semibold">{pendingChoice.title}</h2>
       <p className="mt-1 text-[var(--muted)]">{pendingChoice.copy}</p>

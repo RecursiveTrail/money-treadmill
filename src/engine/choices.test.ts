@@ -240,7 +240,9 @@ describe('marriage and kid', () => {
     const s = maybeChoice({
       ...startGame(DEFAULT_SETUP),
       ageYears: 30,
-      cashBuffer: 2_00_000,
+      cashBuffer: 1_00_000,
+      portfolioValue: 1_20_000,
+      investedAmount: 1_20_000,
       ownedCar: true,
     });
     expect(s.pendingChoice?.kind).toBe('marriage');
