@@ -1,9 +1,10 @@
 import { applyBossEffect, getAnnualBoss } from './bosses';
 import { applyChoice, maybeChoice } from './choices';
 import { EVENT_CHANCE } from './defaults';
-import { applyPaycheck, applySip, compound, payBill } from './economy';
+import { applyPaycheck, applySip, payBill } from './economy';
 import { evaluateEnding } from './ending';
 import { pickLifeEvent } from './events';
+import { applyReturns } from './returns';
 import { pushLedger } from './state';
 import type { ChoiceInput, GameState, Rng } from './types';
 
@@ -48,9 +49,9 @@ export function finishMonth(state: GameState): GameState {
   return bumped;
 }
 
-export function continueMonthTail(state: GameState, _rng: Rng): GameState {
+export function continueMonthTail(state: GameState, rng: Rng): GameState {
   let next = applySip(state);
-  next = compound(next);
+  next = applyReturns(next, rng);
   if (next.needsAnnualBoss) {
     return {
       ...next,

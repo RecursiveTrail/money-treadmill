@@ -35,9 +35,9 @@ describe('house choice', () => {
     });
     const next = resolveChoice(paused, { action: 'accept', tierId: 'bhk2' }, noopRng);
     expect(next.house?.tierId).toBe('bhk2');
-    expect(next.house?.currentValue).toBe(80_00_000);
+    expect(next.house?.currentValue).toBe(Math.round(80_00_000 * 1.05 ** (1 / 12)));
     expect(next.rent).toBe(0);
-    expect(next.cashBuffer).toBe(20_00_000 - 16_00_000);
+    expect(next.cashBuffer).toBe(Math.round((20_00_000 - 16_00_000) * 1.05 ** (1 / 12)));
     expect(next.loans[0]?.kind).toBe('home');
     expect(next.loans[0]?.principalRemaining).toBe(64_00_000);
     expect(next.loans[0]?.emi).toBe(53_532);
@@ -68,7 +68,7 @@ describe('house choice', () => {
     const next = resolveChoice(paused, { action: 'dismiss' }, noopRng);
     expect(next.house).toBeNull();
     expect(next.rent).toBe(25_000);
-    expect(next.cashBuffer).toBe(16_00_000);
+    expect(next.cashBuffer).toBe(Math.round(16_00_000 * 1.05 ** (1 / 12)));
     expect(next.pendingChoice).toBeNull();
   });
 

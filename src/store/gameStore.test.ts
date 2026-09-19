@@ -26,4 +26,15 @@ describe('useGameStore', () => {
     expect(useGameStore.getState().phase).toBe('setup');
     expect(useGameStore.getState().ledger).toEqual(before.ledger);
   });
+
+  it('transfers FD cash to the market', () => {
+    expect(useGameStore.getState().startGame(DEFAULT_SETUP)).toBe(true);
+    useGameStore.setState({ cashBuffer: 20_000, portfolioValue: 10_000, investedAmount: 10_000 });
+
+    useGameStore.getState().transferToMarket(15_000);
+
+    expect(useGameStore.getState().cashBuffer).toBe(5_000);
+    expect(useGameStore.getState().portfolioValue).toBe(25_000);
+    expect(useGameStore.getState().investedAmount).toBe(25_000);
+  });
 });

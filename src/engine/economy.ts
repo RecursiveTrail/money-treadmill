@@ -1,5 +1,5 @@
 import { formatInr } from '../lib/formatInr';
-import { MONTHLY_RETURN, STCG_RATE } from './defaults';
+import { STCG_RATE } from './defaults';
 import { amortize } from './loans';
 import { pushLedger } from './state';
 import type { Ending, GameState } from './types';
@@ -115,6 +115,20 @@ export function applySip(state: GameState): GameState {
   );
 }
 
-export function compound(state: GameState): GameState {
-  return { ...state, portfolioValue: Math.round(state.portfolioValue * MONTHLY_RETURN) };
+export function transferToMarket(state: GameState, amount: number): GameState {
+  const moved = Math.max(0, Math.min(Math.round(amount), state.cashBuffer));
+  if (moved === 0) {
+    return state;
+  }
+  return pushLedger(
+    {
+      ...state,
+      cashBuffer: state.cashBuffer - moved,
+      portfolioValue: state.portfolioValue + moved,
+      investedAmount: state.investedAmount + moved,
+    },
+    'transfer',
+    'Shifted FD to market',
+    -moved,
+  );
 }

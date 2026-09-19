@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETUP, HOME_ANNUAL_RATE, HOME_YEARS } from './defaults';
-import { applyPaycheck, applySip, compound, liquidate, payBill } from './economy';
+import { applyPaycheck, applySip, liquidate, payBill } from './economy';
 import { originateLoan } from './loans';
 import { startGame } from './state';
 
@@ -96,17 +96,11 @@ describe('applySip', () => {
     expect(next.phase).not.toBe('ended');
   });
 
-  it('skips SIP when cash is 0 and leaves portfolio unchanged before compound', () => {
+  it('skips SIP when cash is 0 and leaves portfolio unchanged', () => {
     const before = withCash(0, 80_000);
     const next = applySip({ ...before, plannedSip: 30_000 });
     expect(next.portfolioValue).toBe(80_000);
     expect(next.investedAmount).toBe(80_000);
-  });
-});
-
-describe('compound', () => {
-  it('applies 1% and rounds to a rupee', () => {
-    expect(compound(withCash(0, 100_000)).portfolioValue).toBe(101_000);
   });
 });
 

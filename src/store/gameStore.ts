@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { openChoice as openChoiceEngine } from '../engine/choices';
+import { transferToMarket as transferToMarketEngine } from '../engine/economy';
 import { emptySetupState, resetToSetup, startGame as startGameFromSetup } from '../engine/state';
 import { payPending, resolveChoice, tick } from '../engine/tick';
 import type { ChoiceInput, ChoiceKind, GameState, SetupConfig } from '../engine/types';
@@ -12,6 +13,7 @@ export type GameStore = GameState & {
   resolveChoice: (input: ChoiceInput) => void;
   openChoice: (kind: ChoiceKind) => void;
   setSip: (amount: number) => void;
+  transferToMarket: (amount: number) => void;
   setPaused: (paused: boolean) => void;
   setTickSpeed: (speed: 1 | 2 | 4) => void;
   resetToSetup: () => void;
@@ -40,6 +42,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
   setSip: (amount) => {
     set({ plannedSip: Math.max(0, Math.round(amount)) });
+  },
+  transferToMarket: (amount) => {
+    set(transferToMarketEngine(get(), amount));
   },
   setPaused: (paused) => {
     set({ isPaused: paused });
