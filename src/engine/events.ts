@@ -1,4 +1,4 @@
-import type { PendingEvent, Rng } from './types';
+import type { GameState, PendingEvent, Rng } from './types';
 
 export const LIFE_EVENTS: readonly PendingEvent[] = [
   { id: 'wedding', title: 'Destination wedding', copy: "Friend's destination wedding. You can't say no.", cost: 25_000 },
@@ -18,7 +18,23 @@ export const LIFE_EVENTS: readonly PendingEvent[] = [
   { id: 'swiggy', title: 'Subscriptions', copy: 'Swiggy + Hotstar + "I\'ll cancel later" finally catch up.', cost: 6_000 },
 ];
 
-export function pickLifeEvent(rng: Rng): PendingEvent {
-  const index = Math.min(LIFE_EVENTS.length - 1, Math.floor(rng() * LIFE_EVENTS.length));
-  return LIFE_EVENTS[index]!;
+export function eligibleLifeEvents(state: GameState): PendingEvent[] {
+  return LIFE_EVENTS.filter((event) => {
+    if (event.id === 'society' || event.id === 'plumber') {
+      return state.house !== null;
+    }
+    if (event.id === 'car-sensor') {
+      return state.ownedCar;
+    }
+    return true;
+  });
+}
+
+export function pickLifeEvent(state: GameState, rng: Rng): PendingEvent | null {
+  const pool = eligibleLifeEvents(state);
+  if (pool.length === 0) {
+    return null;
+  }
+  const index = Math.min(pool.length - 1, Math.floor(rng() * pool.length));
+  return pool[index]!;
 }

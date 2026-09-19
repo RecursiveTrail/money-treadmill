@@ -21,7 +21,10 @@ export function beginMonth(state: GameState, rng: Rng): GameState {
     return next;
   }
   if (rng() < EVENT_CHANCE) {
-    return { ...next, pendingEvent: pickLifeEvent(rng), phase: 'awaitingEvent' };
+    const event = pickLifeEvent(next, rng);
+    if (event) {
+      return { ...next, pendingEvent: event, phase: 'awaitingEvent' };
+    }
   }
   return next;
 }
