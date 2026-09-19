@@ -12,33 +12,55 @@ export type GameStore = GameState & {
   payPending: () => void;
   resolveChoice: (input: ChoiceInput) => void;
   openChoice: (kind: ChoiceKind) => void;
+  openChoicePicker: () => void;
+  closeChoicePicker: () => void;
   setSip: (amount: number) => void;
   transferToMarket: (amount: number) => void;
   setPaused: (paused: boolean) => void;
   setTickSpeed: (speed: 1 | 2 | 4) => void;
   resetToSetup: () => void;
+  choicePickerOpen: boolean;
 };
+
+function pickerKind(kind: ChoiceKind | undefined): boolean {
+  return kind === 'house' || kind === 'car' || kind === 'marriage';
+}
 
 export const useGameStore = create<GameStore>((set, get) => ({
   ...emptySetupState(),
+  choicePickerOpen: false,
   startGame: (setup) => {
     if (validateSetup(setup).length > 0) {
       return false;
     }
-    set(startGameFromSetup(setup));
+    set({ ...startGameFromSetup(setup), choicePickerOpen: false });
     return true;
   },
   tick: () => {
-    set(tick(get(), Math.random));
+    set({ ...tick(get(), Math.random), choicePickerOpen: false });
   },
   payPending: () => {
-    set(payPending(get(), Math.random));
+    set({ ...payPending(get(), Math.random), choicePickerOpen: false });
   },
   resolveChoice: (input) => {
-    set(resolveChoice(get(), input, Math.random));
+    set({ ...resolveChoice(get(), input, Math.random), choicePickerOpen: false });
   },
   openChoice: (kind) => {
-    set(openChoiceEngine(get(), kind));
+    const next = openChoiceEngine(get(), kind);
+    set({
+      ...next,
+      choicePickerOpen: next.phase === 'awaitingChoice' && pickerKind(next.pendingChoice?.kind),
+    });
+  },
+  openChoicePicker: () => {
+    const s = get();
+    if (s.phase !== 'awaitingChoice' || !pickerKind(s.pendingChoice?.kind)) {
+      return;
+    }
+    set({ choicePickerOpen: true });
+  },
+  closeChoicePicker: () => {
+    set({ choicePickerOpen: false });
   },
   setSip: (amount) => {
     const planned = Math.max(0, Math.round(amount));
@@ -54,6 +76,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ tickSpeed: speed });
   },
   resetToSetup: () => {
-    set(resetToSetup(get()));
+    set({ ...resetToSetup(get()), choicePickerOpen: false });
   },
 }));

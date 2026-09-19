@@ -7,6 +7,7 @@ import { canPayFromBalance } from '../engine/loans';
 import { emergencyTarget, liveNetWorth } from '../engine/netWorth';
 import { formatInr } from '../lib/formatInr';
 import { useGameStore } from '../store/gameStore';
+import { ActionDock } from './ActionDock';
 import { AnimatedNumber } from './AnimatedNumber';
 import { EmiCard } from './EmiCard';
 import { FdCard } from './FdCard';
@@ -99,6 +100,7 @@ export function Dashboard() {
           ))}
         </div>
       </header>
+      <ActionDock />
       <section className="grid gap-4 md:grid-cols-2">
         <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
           <p className="text-xs uppercase tracking-wide text-[var(--muted)]">Inflows / outflows</p>

@@ -43,4 +43,32 @@ describe('useGameStore', () => {
     expect(useGameStore.getState().portfolioValue).toBe(25_000);
     expect(useGameStore.getState().investedAmount).toBe(25_000);
   });
+
+  it('opens the house picker from HUD and Back leaves the month paused', () => {
+    expect(useGameStore.getState().startGame(DEFAULT_SETUP)).toBe(true);
+    useGameStore.setState({ cashBuffer: 16_00_000, portfolioValue: 0, investedAmount: 0 });
+    useGameStore.getState().openChoice('house');
+    expect(useGameStore.getState().phase).toBe('awaitingChoice');
+    expect(useGameStore.getState().choicePickerOpen).toBe(true);
+    useGameStore.getState().closeChoicePicker();
+    expect(useGameStore.getState().choicePickerOpen).toBe(false);
+    expect(useGameStore.getState().phase).toBe('awaitingChoice');
+    expect(useGameStore.getState().pendingChoice?.kind).toBe('house');
+  });
+
+  it('does not open a picker for payPending', () => {
+    expect(useGameStore.getState().startGame(DEFAULT_SETUP)).toBe(true);
+    useGameStore.setState({
+      phase: 'awaitingEvent',
+      pendingEvent: {
+        id: 'brewery',
+        title: 'Microbrewery',
+        copy: 'Weekend',
+        cost: 8_000,
+      },
+      choicePickerOpen: false,
+    });
+    useGameStore.getState().openChoicePicker();
+    expect(useGameStore.getState().choicePickerOpen).toBe(false);
+  });
 });

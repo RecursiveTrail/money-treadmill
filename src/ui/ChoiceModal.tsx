@@ -16,16 +16,34 @@ export function ChoiceModal() {
   const pendingChoice = useGameStore((s) => s.pendingChoice);
   const cashBuffer = useGameStore((s) => s.cashBuffer);
   const resolveChoice = useGameStore((s) => s.resolveChoice);
+  const closeChoicePicker = useGameStore((s) => s.closeChoicePicker);
   const [weddingSpend, setWeddingSpend] = useState(WEDDING_RECOMMENDED);
 
   if (!pendingChoice) {
     return null;
   }
 
+  if (pendingChoice.kind === 'kid' || pendingChoice.kind === 'taunt') {
+    return null;
+  }
+
   if (pendingChoice.kind === 'marriage') {
     return (
-      <div className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4">
-        <div className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border">
+      <div
+        className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4"
+        onClick={closeChoicePicker}
+      >
+        <div
+          className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            className="min-h-11 rounded border border-[var(--border)] px-3 text-sm"
+            onClick={closeChoicePicker}
+          >
+            Back
+          </button>
           <p className="bg-[var(--money)] px-3 py-1 text-sm font-semibold uppercase tracking-wide text-[var(--modal)]">
             Life choice
           </p>
@@ -69,66 +87,27 @@ export function ChoiceModal() {
     );
   }
 
-  if (pendingChoice.kind === 'kid') {
-    return (
-      <div className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4">
-        <div className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border">
-          <p className="bg-[var(--money)] px-3 py-1 text-sm font-semibold uppercase tracking-wide text-[var(--modal)]">
-            Life choice
-          </p>
-          <h2 className="mt-4 text-xl font-semibold">{pendingChoice.title}</h2>
-          <p className="mt-2 text-[var(--muted)]">{pendingChoice.copy}</p>
-          <p className="mt-4 text-sm text-[var(--muted)]">
-            Birth cost · {formatInr(pendingChoice.birthCost)}
-          </p>
-          <button
-            type="button"
-            className="mt-6 min-h-11 w-full rounded bg-[var(--money)] px-4 py-2 font-medium text-[var(--modal)]"
-            onClick={() => resolveChoice({ action: 'accept' })}
-          >
-            Yes, bacche
-          </button>
-          <button
-            type="button"
-            className="mt-3 min-h-11 w-full rounded bg-[var(--btn)] px-4 py-2 font-medium text-[var(--app-fg)]"
-            onClick={() => resolveChoice({ action: 'dismiss' })}
-          >
-            Not yet
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (pendingChoice.kind === 'taunt') {
-    return (
-      <div className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4">
-        <div className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border">
-          <p className="bg-[var(--money)] px-3 py-1 text-sm font-semibold uppercase tracking-wide text-[var(--modal)]">
-            Family WhatsApp
-          </p>
-          <h2 className="mt-4 text-xl font-semibold">{pendingChoice.title}</h2>
-          <p className="mt-2 whitespace-pre-line text-[var(--muted)]">{pendingChoice.copy}</p>
-          <button
-            type="button"
-            className="mt-6 min-h-11 w-full rounded bg-[var(--money)] px-4 py-2 font-medium text-[var(--modal)]"
-            onClick={() => resolveChoice({ action: 'dismiss' })}
-          >
-            Continue
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const isHouse = pendingChoice.kind === 'house';
   const tiers = isHouse ? HOUSE_TIERS : CAR_TIERS;
   const annualRate = isHouse ? HOME_ANNUAL_RATE : CAR_ANNUAL_RATE;
   const years = isHouse ? HOME_YEARS : CAR_YEARS;
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4">
-      <div className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border">
+    <div
+      className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4"
+      onClick={closeChoicePicker}
+    >
+      <div
+        className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="min-h-11 rounded border border-[var(--border)] px-3 text-sm"
+          onClick={closeChoicePicker}
+        >
+          Back
+        </button>
         <p className="bg-[var(--money)] px-3 py-1 text-sm font-semibold uppercase tracking-wide text-[var(--modal)]">
           Life choice
         </p>
