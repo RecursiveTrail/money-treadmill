@@ -1,12 +1,23 @@
 import { Pause, Play } from 'lucide-react';
 import { ageLabel, monthLabel } from '../engine/calendar';
 import { payableHouseTiers } from '../engine/choices';
-import { liveNetWorth } from '../engine/netWorth';
+import { emergencyTarget, liveNetWorth } from '../engine/netWorth';
 import { formatInr } from '../lib/formatInr';
 import { useGameStore } from '../store/gameStore';
 import { AnimatedNumber } from './AnimatedNumber';
-import { BufferGauge } from './BufferGauge';
+import { EmiCard } from './EmiCard';
+import { FdCard } from './FdCard';
 import { LedgerFeed } from './LedgerFeed';
+
+function InvestmentCard({ value }: { value: number }) {
+  return (
+    <section className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+      <p className="text-xs uppercase tracking-wide text-[var(--muted)]">Investments</p>
+      <p className="mt-2 text-xl font-semibold text-[var(--money)]">{formatInr(value)}</p>
+      <p className="text-xs text-[var(--muted)]">Market value · returns vary monthly</p>
+    </section>
+  );
+}
 
 export function Dashboard() {
   const ageYears = useGameStore((s) => s.ageYears);
@@ -14,6 +25,7 @@ export function Dashboard() {
   const yearsPlayed = useGameStore((s) => s.yearsPlayed);
   const portfolioValue = useGameStore((s) => s.portfolioValue);
   const netWorth = useGameStore(liveNetWorth);
+  const target = useGameStore(emergencyTarget);
   const canOpenHouse = useGameStore(
     (s) => !s.house && payableHouseTiers(s).length > 0,
   );
@@ -25,35 +37,28 @@ export function Dashboard() {
   const isPaused = useGameStore((s) => s.isPaused);
   const tickSpeed = useGameStore((s) => s.tickSpeed);
   const ledger = useGameStore((s) => s.ledger);
+  const loans = useGameStore((s) => s.loans);
   const setPaused = useGameStore((s) => s.setPaused);
   const setTickSpeed = useGameStore((s) => s.setTickSpeed);
   const setSip = useGameStore((s) => s.setSip);
   const openChoice = useGameStore((s) => s.openChoice);
+  const transferToMarket = useGameStore((s) => s.transferToMarket);
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 p-6">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700 pb-3">
-        <p className="text-slate-300">
+    <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 p-4 sm:p-6">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+        <p className="text-[var(--muted)]">
           {monthLabel(yearsPlayed, ageMonths)} · Age {ageLabel(ageYears, ageMonths)}
         </p>
-        <div className="text-center">
-          <p className="text-xs uppercase tracking-wide text-slate-400">Net worth</p>
-          <AnimatedNumber value={netWorth} className="text-2xl font-semibold text-emerald-400" />
-          <p className="text-xs text-slate-400">Portfolio {formatInr(portfolioValue)}</p>
+        <div className="text-right">
+          <p className="text-xs uppercase tracking-wide text-[var(--muted)]">Net worth</p>
+          <AnimatedNumber value={netWorth} className="text-2xl font-semibold text-[var(--money)]" />
+          <p className="text-xs text-[var(--muted)]">Portfolio {formatInr(portfolioValue)}</p>
         </div>
-        <div className="flex items-center gap-2">
-          {canOpenHouse && (
-            <button
-              type="button"
-              className="rounded bg-amber-500 px-3 py-1 font-medium text-slate-950"
-              onClick={() => openChoice('house')}
-            >
-              House
-            </button>
-          )}
+        <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
           <button
             type="button"
-            className="rounded bg-slate-800 px-3 py-1"
+            className="min-h-11 rounded border border-[var(--border)] bg-[var(--card)] px-3"
             aria-label={isPaused ? 'Resume' : 'Pause'}
             onClick={() => setPaused(!isPaused)}
           >
@@ -63,7 +68,9 @@ export function Dashboard() {
             <button
               key={speed}
               type="button"
-              className={`rounded px-3 py-1 ${tickSpeed === speed ? 'bg-slate-600' : 'bg-slate-800'}`}
+              className={`min-h-11 rounded border border-[var(--border)] px-3 ${
+                tickSpeed === speed ? 'bg-[var(--money)] text-[var(--app-bg)]' : 'bg-[var(--card)]'
+              }`}
               onClick={() => setTickSpeed(speed)}
             >
               {speed}x
@@ -71,17 +78,17 @@ export function Dashboard() {
           ))}
         </div>
       </header>
-      <div className="grid flex-1 grid-cols-2 gap-4">
-        <section className="rounded-lg bg-slate-800 p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-400">Inflows / outflows</p>
-          <p className="mt-3 text-emerald-400">Salary +{formatInr(monthlySalary)}</p>
+      <section className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+          <p className="text-xs uppercase tracking-wide text-[var(--muted)]">Inflows / outflows</p>
+          <p className="mt-3 text-[var(--money)]">Salary +{formatInr(monthlySalary)}</p>
           <p className="text-[var(--expense)]">Living −{formatInr(livingExpenses)}</p>
           {rent > 0 ? (
             <p className="text-[var(--expense)]">Rent −{formatInr(rent)}</p>
           ) : (
             <p className="text-[var(--muted)]">Rent: owned</p>
           )}
-          <label className="mt-6 block text-sm text-slate-400">
+          <label className="mt-6 block text-sm text-[var(--muted)]">
             SIP next month · {formatInr(plannedSip)}
             <input
               className="mt-2 w-full"
@@ -93,10 +100,41 @@ export function Dashboard() {
               onChange={(e) => setSip(Number(e.target.value))}
             />
           </label>
-        </section>
-        <BufferGauge cash={cashBuffer} salary={monthlySalary} />
+          {canOpenHouse && (
+            <button
+              type="button"
+              className="mt-4 min-h-11 w-full rounded bg-amber-500 px-3 font-medium text-[var(--app-bg)] sm:w-auto"
+              onClick={() => openChoice('house')}
+            >
+              House
+            </button>
+          )}
+        </div>
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
+          <p className="text-xs uppercase tracking-wide text-[var(--muted)]">Cash</p>
+          <p className={`mt-2 text-2xl font-semibold ${cashBuffer < target ? 'text-amber-400' : 'text-[var(--money)]'}`}>
+            {formatInr(cashBuffer)}
+          </p>
+          <p className="text-xs text-[var(--muted)]">Liquid FD balance</p>
+        </div>
+      </section>
+      <div className="hidden gap-4 md:grid md:grid-cols-3">
+        <InvestmentCard value={portfolioValue} />
+        <EmiCard loans={loans} />
+        <FdCard cash={cashBuffer} target={target} onTransfer={transferToMarket} />
       </div>
-      <LedgerFeed entries={ledger} />
+      <details className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4 md:hidden">
+        <summary className="cursor-pointer text-sm font-medium">Details</summary>
+        <div className="mt-4 grid gap-4">
+          <InvestmentCard value={portfolioValue} />
+          <EmiCard loans={loans} />
+          <FdCard cash={cashBuffer} target={target} onTransfer={transferToMarket} />
+          <LedgerFeed entries={ledger} />
+        </div>
+      </details>
+      <div className="hidden md:block">
+        <LedgerFeed entries={ledger} />
+      </div>
     </div>
   );
 }

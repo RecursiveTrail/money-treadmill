@@ -33,32 +33,32 @@ export function SetupScreen() {
       <p className="text-slate-400">Indian Tax Edition. Set the plan. Survive the months.</p>
       <label className="flex flex-col gap-1 text-sm">
         Starting age
-        <input className="rounded bg-slate-800 p-2" type="number" value={form.startAgeYears} onChange={(e) => field('startAgeYears', e.target.value)} />
+        <input className="w-full rounded bg-slate-800 p-2" type="number" value={form.startAgeYears} onChange={(e) => field('startAgeYears', e.target.value)} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         Target retirement age
-        <input className="rounded bg-slate-800 p-2" type="number" value={form.targetRetirementAge} onChange={(e) => field('targetRetirementAge', e.target.value)} />
+        <input className="w-full rounded bg-slate-800 p-2" type="number" value={form.targetRetirementAge} onChange={(e) => field('targetRetirementAge', e.target.value)} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         Monthly salary
-        <input className="rounded bg-slate-800 p-2" type="number" value={form.monthlySalary} onChange={(e) => field('monthlySalary', e.target.value)} />
+        <input className="w-full rounded bg-slate-800 p-2" type="number" value={form.monthlySalary} onChange={(e) => field('monthlySalary', e.target.value)} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         Fixed expenses
-        <input className="rounded bg-slate-800 p-2" type="number" value={form.fixedExpenses} onChange={(e) => field('fixedExpenses', e.target.value)} />
+        <input className="w-full rounded bg-slate-800 p-2" type="number" value={form.fixedExpenses} onChange={(e) => field('fixedExpenses', e.target.value)} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         Planned SIP
-        <input className="rounded bg-slate-800 p-2" type="number" value={form.plannedSip} onChange={(e) => field('plannedSip', e.target.value)} />
+        <input className="w-full rounded bg-slate-800 p-2" type="number" value={form.plannedSip} onChange={(e) => field('plannedSip', e.target.value)} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         Target corpus (today&apos;s ₹)
-        <input className="rounded bg-slate-800 p-2" type="number" value={form.targetCorpusToday} onChange={(e) => field('targetCorpusToday', e.target.value)} />
+        <input className="w-full rounded bg-slate-800 p-2" type="number" value={form.targetCorpusToday} onChange={(e) => field('targetCorpusToday', e.target.value)} />
       </label>
       {errors.map((err) => (
         <p key={err} className="text-sm text-rose-500">{err}</p>
       ))}
-      <button type="submit" className="rounded bg-emerald-500 px-4 py-2 font-medium text-slate-950">
+      <button type="submit" className="min-h-11 w-full rounded bg-emerald-500 px-4 py-2 font-medium text-slate-950">
         Start treadmill
       </button>
     </form>
