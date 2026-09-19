@@ -70,15 +70,21 @@ export function applyPaycheck(state: GameState): GameState {
   if (state.rent > 0) {
     next = pushLedger(next, 'expense', 'Rent', -state.rent);
   }
+  const emiLedgerStart = next.ledgerSeq;
+  for (const loan of next.loans) {
+    next = pushLedger(next, 'emi', loan.kind === 'home' ? 'Home EMI' : 'Car EMI', -loan.emi);
+  }
   if (next.cashBuffer < 0) {
     const deficit = -next.cashBuffer;
     next = liquidate({ ...next, cashBuffer: 0 }, deficit);
   }
   if (next.phase === 'ended') {
-    return next;
-  }
-  for (const loan of next.loans) {
-    next = pushLedger(next, 'emi', loan.kind === 'home' ? 'Home EMI' : 'Car EMI', -loan.emi);
+    return {
+      ...next,
+      ledger: next.ledger.filter(
+        (entry) => entry.kind !== 'emi' || Number(entry.id) <= emiLedgerStart,
+      ),
+    };
   }
   const loans = next.loans
     .map((loan) => amortize(loan))

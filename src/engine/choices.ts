@@ -49,7 +49,7 @@ export function payableCarTiers(state: GameState): CarTierId[] {
   ).map((tier) => tier.id);
 }
 
-function housePending(state: GameState): GameState {
+function housePending(state: GameState, source: 'auto' | 'hud'): GameState {
   const payableTierIds = payableHouseTiers(state);
   if (payableTierIds.length === 0) {
     return state;
@@ -58,6 +58,7 @@ function housePending(state: GameState): GameState {
     ...state,
     pendingChoice: {
       kind: 'house',
+      source,
       title: 'Ghar le lo',
       copy: 'Broker says inventory is moving. EMI replaces rent. Relatives already know.',
       payableTierIds,
@@ -78,6 +79,7 @@ function maybeMarriage(state: GameState): GameState {
     ...state,
     pendingChoice: {
       kind: 'marriage',
+      source: 'auto',
       title: 'Shaadi',
       copy: 'Choose how much family prestige the FD can absorb.',
       recommended: WEDDING_RECOMMENDED,
@@ -101,6 +103,7 @@ function maybeKid(state: GameState): GameState {
     ...state,
     pendingChoice: {
       kind: 'kid',
+      source: 'auto',
       title: 'Bacche?',
       copy: 'One tiny dependent, one permanent line item.',
       birthCost: BIRTH_COST,
@@ -115,7 +118,7 @@ function maybeHouse(state: GameState): GameState {
     return state;
   }
   if (!state.offered.house || (state.ageMonths === 0 && state.yearsPlayed > 0)) {
-    return housePending(state);
+    return housePending(state, 'auto');
   }
   return state;
 }
@@ -129,6 +132,7 @@ function maybeCar(state: GameState): GameState {
       ...state,
       pendingChoice: {
         kind: 'car',
+        source: 'auto',
         title: 'Gaadi le lo',
         copy: 'The colony has noticed your cab receipts. Pick an EMI with wheels.',
         payableTierIds: payableCarTiers(state),
@@ -166,6 +170,7 @@ function maybeTaunt(state: GameState): GameState {
     ...state,
     pendingChoice: {
       kind: 'taunt',
+      source: 'auto',
       title: 'Log kya kahenge?',
       copy: lines.join('\n'),
     },
@@ -193,13 +198,14 @@ export function openChoice(state: GameState, kind: ChoiceKind): GameState {
     return state;
   }
   if (kind === 'house' && !state.house && payableHouseTiers(state).length > 0) {
-    return housePending(state);
+    return housePending(state, 'hud');
   }
   if (kind === 'car' && !state.ownedCar && payableCarTiers(state).length > 0) {
     return {
       ...state,
       pendingChoice: {
         kind: 'car',
+        source: 'hud',
         title: 'Gaadi le lo',
         copy: 'The colony has noticed your cab receipts. Pick an EMI with wheels.',
         payableTierIds: payableCarTiers(state),
@@ -213,6 +219,7 @@ export function openChoice(state: GameState, kind: ChoiceKind): GameState {
       ...state,
       pendingChoice: {
         kind: 'marriage',
+        source: 'hud',
         title: 'Shaadi',
         copy: 'Choose how much family prestige the FD can absorb.',
         recommended: WEDDING_RECOMMENDED,
@@ -229,6 +236,7 @@ export function openChoice(state: GameState, kind: ChoiceKind): GameState {
       ...state,
       pendingChoice: {
         kind: 'kid',
+        source: 'hud',
         title: 'Bacche?',
         copy: 'One tiny dependent, one permanent line item.',
         birthCost: BIRTH_COST,

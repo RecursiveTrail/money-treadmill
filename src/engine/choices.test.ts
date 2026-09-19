@@ -9,6 +9,23 @@ const noopRng = () => 0.5;
 const neverEvent = () => 0.99;
 
 describe('house choice', () => {
+  it('does not finish or compound a month after dismissing a HUD choice', () => {
+    const boundary = {
+      ...startGame(DEFAULT_SETUP),
+      ageMonths: 4,
+      cashBuffer: 16_00_000,
+      portfolioValue: 10_00_000,
+      investedAmount: 10_00_000,
+    };
+    const paused = openChoice(boundary, 'house');
+
+    const next = resolveChoice(paused, { action: 'dismiss' }, noopRng);
+
+    expect(next.ageMonths).toBe(boundary.ageMonths);
+    expect(next.cashBuffer).toBe(boundary.cashBuffer);
+    expect(next.portfolioValue).toBe(boundary.portfolioValue);
+  });
+
   it('does not unlock 2 BHK when cash and portfolio cannot pay 16L after STCG', () => {
     const s = maybeChoice({
       ...startGame(DEFAULT_SETUP),
@@ -324,6 +341,7 @@ describe('taunts', () => {
     });
     expect(s.pendingChoice).toEqual({
       kind: 'taunt',
+      source: 'auto',
       title: 'Log kya kahenge?',
       copy: [
         'Ghar kab le rahe ho? Rent receipt is not an heirloom.',

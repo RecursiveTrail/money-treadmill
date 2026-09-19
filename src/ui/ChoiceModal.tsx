@@ -5,6 +5,7 @@ import {
   CAR_YEARS,
   HOME_ANNUAL_RATE,
   HOME_YEARS,
+  STCG_RATE,
   WEDDING_RECOMMENDED,
 } from '../engine/defaults';
 import { downPayment, emi } from '../engine/loans';
@@ -13,6 +14,7 @@ import { useGameStore } from '../store/gameStore';
 
 export function ChoiceModal() {
   const pendingChoice = useGameStore((s) => s.pendingChoice);
+  const cashBuffer = useGameStore((s) => s.cashBuffer);
   const resolveChoice = useGameStore((s) => s.resolveChoice);
   const [weddingSpend, setWeddingSpend] = useState(WEDDING_RECOMMENDED);
 
@@ -22,14 +24,14 @@ export function ChoiceModal() {
 
   if (pendingChoice.kind === 'marriage') {
     return (
-      <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-950/70 md:p-4">
-        <div className="h-full w-full max-w-md overflow-y-auto border-amber-500 bg-slate-900 p-6 md:h-auto md:rounded-lg md:border">
-          <p className="bg-amber-500 px-3 py-1 text-sm font-semibold uppercase tracking-wide text-slate-950">
+      <div className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4">
+        <div className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border">
+          <p className="bg-[var(--money)] px-3 py-1 text-sm font-semibold uppercase tracking-wide text-[var(--modal)]">
             Life choice
           </p>
           <h2 className="mt-4 text-xl font-semibold">{pendingChoice.title}</h2>
-          <p className="mt-2 text-slate-300">{pendingChoice.copy}</p>
-          <label className="mt-6 block text-sm text-slate-300">
+          <p className="mt-2 text-[var(--muted)]">{pendingChoice.copy}</p>
+          <label className="mt-6 block text-sm text-[var(--muted)]">
             Wedding spend · {formatInr(weddingSpend)}
             <input
               className="mt-3 w-full"
@@ -43,21 +45,21 @@ export function ChoiceModal() {
           </label>
           <button
             type="button"
-            className="mt-3 rounded-full border border-amber-500 px-3 py-1 text-sm text-amber-300"
+            className="mt-3 rounded-full border border-[var(--money)] px-3 py-1 text-sm text-[var(--money)]"
             onClick={() => setWeddingSpend(pendingChoice.recommended)}
           >
             Recommended · {formatInr(pendingChoice.recommended)}
           </button>
           <button
             type="button"
-            className="mt-6 min-h-11 w-full rounded bg-amber-500 px-4 py-2 font-medium text-slate-950"
+            className="mt-6 min-h-11 w-full rounded bg-[var(--money)] px-4 py-2 font-medium text-[var(--modal)]"
             onClick={() => resolveChoice({ action: 'accept', spend: weddingSpend })}
           >
             Get married
           </button>
           <button
             type="button"
-            className="mt-3 min-h-11 w-full rounded bg-slate-700 px-4 py-2 font-medium text-white"
+            className="mt-3 min-h-11 w-full rounded bg-[var(--btn)] px-4 py-2 font-medium text-[var(--app-fg)]"
             onClick={() => resolveChoice({ action: 'dismiss' })}
           >
             Not yet
@@ -69,26 +71,26 @@ export function ChoiceModal() {
 
   if (pendingChoice.kind === 'kid') {
     return (
-      <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-950/70 md:p-4">
-        <div className="h-full w-full max-w-md overflow-y-auto border-amber-500 bg-slate-900 p-6 md:h-auto md:rounded-lg md:border">
-          <p className="bg-amber-500 px-3 py-1 text-sm font-semibold uppercase tracking-wide text-slate-950">
+      <div className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4">
+        <div className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border">
+          <p className="bg-[var(--money)] px-3 py-1 text-sm font-semibold uppercase tracking-wide text-[var(--modal)]">
             Life choice
           </p>
           <h2 className="mt-4 text-xl font-semibold">{pendingChoice.title}</h2>
-          <p className="mt-2 text-slate-300">{pendingChoice.copy}</p>
-          <p className="mt-4 text-sm text-slate-400">
+          <p className="mt-2 text-[var(--muted)]">{pendingChoice.copy}</p>
+          <p className="mt-4 text-sm text-[var(--muted)]">
             Birth cost · {formatInr(pendingChoice.birthCost)}
           </p>
           <button
             type="button"
-            className="mt-6 min-h-11 w-full rounded bg-amber-500 px-4 py-2 font-medium text-slate-950"
+            className="mt-6 min-h-11 w-full rounded bg-[var(--money)] px-4 py-2 font-medium text-[var(--modal)]"
             onClick={() => resolveChoice({ action: 'accept' })}
           >
             Yes, bacche
           </button>
           <button
             type="button"
-            className="mt-3 min-h-11 w-full rounded bg-slate-700 px-4 py-2 font-medium text-white"
+            className="mt-3 min-h-11 w-full rounded bg-[var(--btn)] px-4 py-2 font-medium text-[var(--app-fg)]"
             onClick={() => resolveChoice({ action: 'dismiss' })}
           >
             Not yet
@@ -100,16 +102,16 @@ export function ChoiceModal() {
 
   if (pendingChoice.kind === 'taunt') {
     return (
-      <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-950/70 md:p-4">
-        <div className="h-full w-full max-w-md overflow-y-auto border-amber-500 bg-slate-900 p-6 md:h-auto md:rounded-lg md:border">
-          <p className="bg-amber-500 px-3 py-1 text-sm font-semibold uppercase tracking-wide text-slate-950">
+      <div className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4">
+        <div className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border">
+          <p className="bg-[var(--money)] px-3 py-1 text-sm font-semibold uppercase tracking-wide text-[var(--modal)]">
             Family WhatsApp
           </p>
           <h2 className="mt-4 text-xl font-semibold">{pendingChoice.title}</h2>
-          <p className="mt-2 whitespace-pre-line text-slate-300">{pendingChoice.copy}</p>
+          <p className="mt-2 whitespace-pre-line text-[var(--muted)]">{pendingChoice.copy}</p>
           <button
             type="button"
-            className="mt-6 min-h-11 w-full rounded bg-amber-500 px-4 py-2 font-medium text-slate-950"
+            className="mt-6 min-h-11 w-full rounded bg-[var(--money)] px-4 py-2 font-medium text-[var(--modal)]"
             onClick={() => resolveChoice({ action: 'dismiss' })}
           >
             Continue
@@ -125,31 +127,39 @@ export function ChoiceModal() {
   const years = isHouse ? HOME_YEARS : CAR_YEARS;
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-950/70 md:p-4">
-      <div className="h-full w-full max-w-md overflow-y-auto border-amber-500 bg-slate-900 p-6 md:h-auto md:rounded-lg md:border">
-        <p className="bg-amber-500 px-3 py-1 text-sm font-semibold uppercase tracking-wide text-slate-950">
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] md:p-4">
+      <div className="h-full w-full max-w-md overflow-y-auto border-[var(--border)] bg-[var(--modal)] p-6 md:h-auto md:rounded-lg md:border">
+        <p className="bg-[var(--money)] px-3 py-1 text-sm font-semibold uppercase tracking-wide text-[var(--modal)]">
           Life choice
         </p>
         <h2 className="mt-4 text-xl font-semibold">{pendingChoice.title}</h2>
-        <p className="mt-2 text-slate-300">{pendingChoice.copy}</p>
+        <p className="mt-2 text-[var(--muted)]">{pendingChoice.copy}</p>
         <div className="mt-6 space-y-3">
           {tiers.map((tier) => {
             const down = downPayment(tier.price);
             const monthlyEmi = emi(tier.price - down, annualRate, years);
             const payable = pendingChoice.payableTierIds.some((id) => id === tier.id);
+            const amountNeeded = Math.round(
+              Math.max(down - cashBuffer, 0) * (1 + STCG_RATE),
+            );
             return (
-              <div key={tier.id} className="rounded border border-slate-700 p-4">
+              <div key={tier.id} className="rounded border border-[var(--border)] p-4">
                 <div className="grid gap-3">
                   <div>
                     <h3 className="font-semibold">{tier.label}</h3>
-                    <p className="text-sm text-slate-400">Price {formatInr(tier.price)}</p>
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-[var(--muted)]">Price {formatInr(tier.price)}</p>
+                    <p className="text-sm text-[var(--muted)]">
                       Down {formatInr(down)} · EMI {formatInr(monthlyEmi)}
                     </p>
+                    {!payable && (
+                      <p className="mt-1 text-xs text-[var(--expense)]">
+                        need {formatInr(amountNeeded)} more (incl. STCG)
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
-                    className="min-h-11 w-full rounded bg-amber-500 px-3 py-2 font-medium text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="min-h-11 w-full rounded bg-[var(--money)] px-3 py-2 font-medium text-[var(--modal)] disabled:cursor-not-allowed disabled:opacity-40"
                     disabled={!payable}
                     onClick={() => resolveChoice({ action: 'accept', tierId: tier.id })}
                   >
@@ -162,7 +172,7 @@ export function ChoiceModal() {
         </div>
         <button
           type="button"
-          className="mt-6 min-h-11 w-full rounded bg-slate-700 px-4 py-2 font-medium text-white"
+          className="mt-6 min-h-11 w-full rounded bg-[var(--btn)] px-4 py-2 font-medium text-[var(--app-fg)]"
           onClick={() => resolveChoice({ action: 'dismiss' })}
         >
           {isHouse ? 'Keep renting' : 'Not now'}

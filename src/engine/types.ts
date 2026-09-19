@@ -79,10 +79,23 @@ export type OfferedFlags = {
 };
 
 export type PendingChoice =
-  | { kind: 'house'; title: string; copy: string; payableTierIds: HouseTierId[] }
-  | { kind: 'car'; title: string; copy: string; payableTierIds: CarTierId[] }
+  | {
+      kind: 'house';
+      source: 'auto' | 'hud';
+      title: string;
+      copy: string;
+      payableTierIds: HouseTierId[];
+    }
+  | {
+      kind: 'car';
+      source: 'auto' | 'hud';
+      title: string;
+      copy: string;
+      payableTierIds: CarTierId[];
+    }
   | {
       kind: 'marriage';
+      source: 'auto' | 'hud';
       title: string;
       copy: string;
       recommended: number;
@@ -90,8 +103,19 @@ export type PendingChoice =
       maxSpend: number;
       step: number;
     }
-  | { kind: 'kid'; title: string; copy: string; birthCost: number }
-  | { kind: 'taunt'; title: string; copy: string };
+  | {
+      kind: 'kid';
+      source: 'auto' | 'hud';
+      title: string;
+      copy: string;
+      birthCost: number;
+    }
+  | {
+      kind: 'taunt';
+      source: 'auto' | 'hud';
+      title: string;
+      copy: string;
+    };
 
 export type ChoiceInput =
   | { action: 'dismiss' }

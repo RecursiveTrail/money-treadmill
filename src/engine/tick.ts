@@ -55,8 +55,8 @@ export function finishMonth(state: GameState): GameState {
           schoolStarted: true,
         },
         'system',
-        'School fees begin',
-        -SCHOOL_LIVING_BUMP,
+        `School fees begin (+₹${SCHOOL_LIVING_BUMP.toLocaleString('en-IN')}/month)`,
+        0,
       );
     } else {
       bumped = { ...bumped, childMonths };
@@ -149,9 +149,10 @@ export function resolveChoice(state: GameState, input: ChoiceInput, rng: Rng): G
   if (state.phase !== 'awaitingChoice' || !state.pendingChoice) {
     return state;
   }
+  const { source } = state.pendingChoice;
   const applied = applyChoice(state, input);
   if (applied.phase === 'ended' || applied.phase === 'awaitingChoice') {
     return applied;
   }
-  return continueMonthTail(applied, rng);
+  return source === 'auto' ? continueMonthTail(applied, rng) : applied;
 }

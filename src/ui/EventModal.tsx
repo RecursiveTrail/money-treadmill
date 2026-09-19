@@ -36,16 +36,16 @@ export function EventModal() {
   const action = bill > 0 ? `Pay ${formatInr(bill)}` : 'Continue';
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-950/70 p-4">
-      <div className="w-full max-w-md animate-shake rounded-lg border border-rose-500 bg-slate-900 p-6">
-        <p className="bg-rose-500 px-3 py-1 text-sm font-semibold uppercase tracking-wide text-white">
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-[var(--scrim)] p-4">
+      <div className="w-full max-w-md animate-shake rounded-lg border border-[var(--expense)] bg-[var(--modal)] p-6">
+        <p className="bg-[var(--expense)] px-3 py-1 text-sm font-semibold uppercase tracking-wide text-[var(--modal)]">
           {isBoss ? 'Breaking News' : 'Life happens'}
         </p>
         <h2 className="mt-4 text-xl font-semibold">{title}</h2>
-        <p className="mt-2 text-slate-300">{copy}</p>
+        <p className="mt-2 text-[var(--muted)]">{copy}</p>
         <button
           type="button"
-          className="mt-6 w-full rounded bg-rose-500 px-4 py-2 font-medium text-white"
+          className="mt-6 w-full rounded bg-[var(--expense)] px-4 py-2 font-medium text-[var(--modal)]"
           onClick={payPending}
         >
           {action}
