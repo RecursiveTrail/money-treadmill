@@ -15,9 +15,9 @@ describe('evaluateEnding', () => {
     };
     const ending = evaluateEnding(state);
     const gains = 1_64_00_000 - 72_00_000;
-    const tax = gains * 0.125;
-    const afterTax = 1_64_00_000 - tax;
-    const real = afterTax / 1.07 ** 20;
+    const tax = Math.round(gains * 0.125);
+    const afterTax = Math.round(1_64_00_000 - tax);
+    const real = Math.round(afterTax / 1.07 ** 20);
     expect(ending.tax).toBe(tax);
     expect(ending.afterTax).toBe(afterTax);
     expect(ending.realPurchasingPower).toBe(real);

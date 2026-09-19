@@ -8,7 +8,7 @@ export function validateSetup(setup: SetupConfig): string[] {
     setup.plannedSip,
     setup.targetCorpusToday,
   ];
-  if (!Number.isFinite(setup.startAgeYears) || !Number.isFinite(setup.targetRetirementAge)) {
+  if (!Number.isInteger(setup.startAgeYears) || !Number.isInteger(setup.targetRetirementAge)) {
     errors.push('Ages must be numbers.');
   }
   if (setup.targetRetirementAge <= setup.startAgeYears) {

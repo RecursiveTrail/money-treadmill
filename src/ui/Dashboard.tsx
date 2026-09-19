@@ -30,7 +30,12 @@ export function Dashboard() {
         </p>
         <AnimatedNumber value={portfolioValue} className="text-2xl font-semibold text-emerald-400" />
         <div className="flex items-center gap-2">
-          <button type="button" className="rounded bg-slate-800 px-3 py-1" onClick={() => setPaused(!isPaused)}>
+          <button
+            type="button"
+            className="rounded bg-slate-800 px-3 py-1"
+            aria-label={isPaused ? 'Resume' : 'Pause'}
+            onClick={() => setPaused(!isPaused)}
+          >
             {isPaused ? <Play size={16} /> : <Pause size={16} />}
           </button>
           {([1, 2, 4] as const).map((speed) => (

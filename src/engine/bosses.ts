@@ -10,6 +10,9 @@ const ROTATION: PendingBoss[] = [
 ];
 
 export function getAnnualBoss(yearsPlayed: number): PendingBoss {
+  if (yearsPlayed < 1) {
+    throw new Error(`getAnnualBoss requires yearsPlayed >= 1, got ${yearsPlayed}`);
+  }
   if (yearsPlayed === 1) {
     return { id: 'hike-8', title: 'Breaking News: Appraisal', copy: 'Appraisal season. CTC hiked 8%. Stretch assignment attached.', effect: { type: 'salaryMul', factor: 1.08 } };
   }

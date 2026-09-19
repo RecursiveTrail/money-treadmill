@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETUP } from './defaults';
 import { startGame } from './state';
-import { payPending, tick } from './tick';
+import { applyBossAndFinish, payPending, tick } from './tick';
 import type { GameState, Rng } from './types';
 
 const neverEvent: Rng = () => 0.99;
@@ -56,5 +56,20 @@ describe('tick', () => {
     expect(s.yearsPlayed).toBe(20);
     expect(s.ending).not.toBeNull();
     expect(s.ending?.result === 'win' || s.ending?.result === 'lose').toBe(true);
+  });
+
+  it('logs a Diwali oneShotBill of -15000 only once', () => {
+    const next = applyBossAndFinish({
+      ...startGame(DEFAULT_SETUP),
+      cashBuffer: 50_000,
+      pendingBoss: {
+        id: 'diwali-boss',
+        title: 'Breaking News: Diwali',
+        copy: 'Company Diwali gift is a thali. The bill is yours.',
+        effect: { type: 'oneShotBill', amount: 15_000 },
+      },
+      phase: 'awaitingBoss',
+    });
+    expect(next.ledger.filter((entry) => entry.amount === -15_000)).toHaveLength(1);
   });
 });

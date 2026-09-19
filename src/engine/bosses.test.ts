@@ -4,6 +4,10 @@ import { DEFAULT_SETUP } from './defaults';
 import { startGame } from './state';
 
 describe('getAnnualBoss', () => {
+  it('throws when yearsPlayed is below 1', () => {
+    expect(() => getAnnualBoss(0)).toThrow(/yearsPlayed >= 1/);
+  });
+
   it('sets year-2 LTCG to 12.5%', () => {
     const boss = getAnnualBoss(2);
     expect(boss.id).toBe('ltcg-hike');

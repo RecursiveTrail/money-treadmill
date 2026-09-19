@@ -82,7 +82,7 @@ export function applyBossAndFinish(state: GameState): GameState {
     { ...next, pendingBoss: null, needsAnnualBoss: false },
     'boss',
     boss.title,
-    boss.effect.type === 'oneShotBill' ? -boss.effect.amount : 0,
+    0,
   );
   if (next.phase === 'ended') {
     return next;

@@ -7,6 +7,10 @@ describe('validateSetup', () => {
     expect(validateSetup(DEFAULT_SETUP)).toEqual([]);
   });
 
+  it('rejects non-integer start age', () => {
+    expect(validateSetup({ ...DEFAULT_SETUP, startAgeYears: 25.5 }).length).toBeGreaterThan(0);
+  });
+
   it('rejects retirement at or before start age', () => {
     expect(validateSetup({ ...DEFAULT_SETUP, targetRetirementAge: 25 }).length).toBeGreaterThan(0);
   });
