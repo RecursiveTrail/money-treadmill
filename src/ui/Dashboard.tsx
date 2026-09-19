@@ -1,6 +1,9 @@
 import { Pause, Play } from 'lucide-react';
 import { ageLabel, monthLabel } from '../engine/calendar';
 import { payableCarTiers, payableHouseTiers } from '../engine/choices';
+import { BIRTH_COST, WEDDING_MIN } from '../engine/defaults';
+import { sipCap } from '../engine/economy';
+import { canPayFromBalance } from '../engine/loans';
 import { emergencyTarget, liveNetWorth } from '../engine/netWorth';
 import { formatInr } from '../lib/formatInr';
 import { useGameStore } from '../store/gameStore';
@@ -33,12 +36,23 @@ export function Dashboard() {
   const canOpenCar = useGameStore(
     (s) => !s.ownedCar && payableCarTiers(s).length > 0,
   );
-  const canOpenMarriage = useGameStore((s) => s.ageYears >= 30 && !s.married);
-  const canOpenKid = useGameStore((s) => s.married && !s.hasChild);
+  const canOpenMarriage = useGameStore(
+    (s) =>
+      s.ageYears >= 30 &&
+      !s.married &&
+      canPayFromBalance(s.cashBuffer, s.portfolioValue, WEDDING_MIN),
+  );
+  const canOpenKid = useGameStore(
+    (s) =>
+      s.married &&
+      !s.hasChild &&
+      canPayFromBalance(s.cashBuffer, s.portfolioValue, BIRTH_COST),
+  );
   const monthlySalary = useGameStore((s) => s.monthlySalary);
   const livingExpenses = useGameStore((s) => s.livingExpenses);
   const rent = useGameStore((s) => s.rent);
   const plannedSip = useGameStore((s) => s.plannedSip);
+  const cap = useGameStore(sipCap);
   const cashBuffer = useGameStore((s) => s.cashBuffer);
   const isPaused = useGameStore((s) => s.isPaused);
   const tickSpeed = useGameStore((s) => s.tickSpeed);
@@ -95,15 +109,20 @@ export function Dashboard() {
           ) : (
             <p className="text-[var(--muted)]">Rent: owned</p>
           )}
+          {loans.map((loan) => (
+            <p key={`${loan.kind}-${loan.monthsRemaining}`} className="text-[var(--expense)]">
+              {loan.kind === 'home' ? 'Home EMI' : 'Car EMI'} −{formatInr(loan.emi)}
+            </p>
+          ))}
           <label className="mt-6 block text-sm text-[var(--muted)]">
             SIP next month · {formatInr(plannedSip)}
             <input
               className="mt-2 w-full"
               type="range"
               min={0}
-              max={monthlySalary}
+              max={Math.max(cap, 0)}
               step={1000}
-              value={Math.min(plannedSip, monthlySalary)}
+              value={Math.min(plannedSip, cap)}
               onChange={(e) => setSip(Number(e.target.value))}
             />
           </label>
