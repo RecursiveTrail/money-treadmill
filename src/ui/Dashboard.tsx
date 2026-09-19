@@ -8,6 +8,7 @@ import { AnimatedNumber } from './AnimatedNumber';
 import { EmiCard } from './EmiCard';
 import { FdCard } from './FdCard';
 import { LedgerFeed } from './LedgerFeed';
+import { ThemeToggle } from './ThemeToggle';
 
 function InvestmentCard({ value }: { value: number }) {
   return (
@@ -56,6 +57,7 @@ export function Dashboard() {
           <p className="text-xs text-[var(--muted)]">Portfolio {formatInr(portfolioValue)}</p>
         </div>
         <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
+          <ThemeToggle />
           <button
             type="button"
             className="min-h-11 rounded border border-[var(--border)] bg-[var(--card)] px-3"

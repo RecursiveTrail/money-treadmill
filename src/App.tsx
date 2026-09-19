@@ -9,7 +9,7 @@ import { useGameStore } from './store/gameStore';
 export default function App() {
   const phase = useGameStore((s) => s.phase);
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <div className="min-h-screen bg-[var(--app-bg)] text-[var(--app-fg)]">
       <GameLoop />
       {phase === 'setup' && <SetupScreen />}
       {phase !== 'setup' && phase !== 'ended' && <Dashboard />}

@@ -3,16 +3,47 @@
 @tailwind utilities;
 
 :root {
+  --app-bg: #f8fafc;
+  --app-fg: #0f172a;
+  --muted: #64748b;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --input: #f1f5f9;
+  --ledger: #f1f5f9;
+  --ledger-pos: #047857;
+  --ledger-neg: #be123c;
+  --money: #059669;
+  --expense: #e11d48;
+  --cyan: #0e7490;
+  --btn: #e2e8f0;
+  --btn-active: #cbd5e1;
+  --scrim: rgb(15 23 42 / 0.45);
+  --modal: #ffffff;
+}
+
+html.dark {
   --app-bg: #0f172a;
-  --money: #34d399;
-  --expense: #fda4af;
+  --app-fg: #f1f5f9;
   --muted: #94a3b8;
-  --border: #475569;
   --card: #1e293b;
+  --border: #334155;
+  --input: #1e293b;
+  --ledger: #020617;
+  --ledger-pos: #6ee7b7;
+  --ledger-neg: #fda4af;
+  --money: #34d399;
+  --expense: #f43f5e;
+  --cyan: #67e8f9;
+  --btn: #1e293b;
+  --btn-active: #475569;
+  --scrim: rgb(2 6 23 / 0.7);
+  --modal: #0f172a;
 }
 
 html,
 body,
 #root {
   min-height: 100%;
+  background: var(--app-bg);
+  color: var(--app-fg);
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { formatInr } from '../lib/formatInr';
 import { BufferGauge } from './BufferGauge';
 
@@ -9,6 +9,7 @@ type FdCardProps = {
 };
 
 export function FdCard({ cash, target, onTransfer }: FdCardProps) {
+  const transferId = useId();
   const [amount, setAmount] = useState('');
   const belowTarget = cash < target;
 
@@ -26,11 +27,11 @@ export function FdCard({ cash, target, onTransfer }: FdCardProps) {
       <p className="text-xs text-[var(--muted)]">FD ~5%</p>
       <BufferGauge cash={cash} target={target} />
       <div className="mt-4 grid gap-2">
-        <label className="text-xs text-[var(--muted)]" htmlFor="market-transfer">
+        <label className="text-xs text-[var(--muted)]" htmlFor={transferId}>
           Amount to move
         </label>
         <input
-          id="market-transfer"
+          id={transferId}
           className="min-h-11 w-full rounded border border-[var(--border)] bg-[var(--app-bg)] px-3"
           type="number"
           min={0}
