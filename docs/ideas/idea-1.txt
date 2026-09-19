@@ -1,0 +1,20 @@
+Few issues
+
+  SIP investment can be more than available cash to invest (salary income+ money sitting in cash - all  expenses)
+
+  I saw house maintainance and sinking fund without even buying home 
+
+  I hope EMIs are properly minus just line expenses. 
+
+  Don't show button for shaadi, home etc if doesn't have required minimum money 
+
+  Instead of blocking modal we should add a section on top and give the action there. 
+  Actions with lot of optiions like buying car, can open modal on click 
+  Idea is screen should not get blocked and user can scroll to see details 
+
+  Now if bill payment comes and give option to cancel things like subscription. 
+  All these action till user doesn't take actions stay on that step. 
+
+  
+
+ 
