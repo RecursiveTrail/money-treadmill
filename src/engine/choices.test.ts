@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETUP } from './defaults';
 import { applyChoice, maybeChoice, openChoice } from './choices';
+import { sipCap } from './economy';
 import { homeEquity, liveNetWorth } from './netWorth';
 import { startGame } from './state';
 import { finishMonth, resolveChoice, tick } from './tick';
@@ -61,6 +62,21 @@ describe('house choice', () => {
     expect(next.loans[0]?.principalRemaining).toBe(64_00_000);
     expect(next.loans[0]?.emi).toBe(53_532);
     expect(next.pendingChoice).toBeNull();
+  });
+
+  it('clamps planned SIP after a house purchase raises EMI', () => {
+    const paused = openChoice(
+      {
+        ...startGame(DEFAULT_SETUP),
+        cashBuffer: 16_00_000,
+        plannedSip: 80_000,
+      },
+      'house',
+    );
+    const next = resolveChoice(paused, { action: 'accept', tierId: 'bhk2' }, noopRng);
+    expect(next.house).not.toBeNull();
+    expect(next.plannedSip).toBe(sipCap(next));
+    expect(next.plannedSip).toBeLessThan(80_000);
   });
 
   it('uses STCG sell when cash is 6L and portfolio is large', () => {

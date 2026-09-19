@@ -4,6 +4,34 @@ import { amortize } from './loans';
 import { pushLedger } from './state';
 import type { Ending, GameState } from './types';
 
+function monthlyOutflow(state: GameState): number {
+  const emiTotal = state.loans.reduce((sum, loan) => sum + loan.emi, 0);
+  return state.livingExpenses + state.rent + emiTotal;
+}
+
+function sipPendingThisMonth(state: GameState): boolean {
+  return (
+    state.phase === 'awaitingEvent' ||
+    (state.phase === 'awaitingChoice' && state.pendingChoice?.source === 'auto')
+  );
+}
+
+export function sipCap(state: GameState): number {
+  if (sipPendingThisMonth(state)) {
+    return Math.max(0, state.cashBuffer);
+  }
+  return Math.max(0, state.cashBuffer + state.monthlySalary - monthlyOutflow(state));
+}
+
+export function clampPlannedSip(state: GameState): GameState {
+  const cap = sipCap(state);
+  const plannedSip = Math.max(0, Math.min(state.plannedSip, cap));
+  if (plannedSip === state.plannedSip) {
+    return state;
+  }
+  return { ...state, plannedSip };
+}
+
 function bankruptEnding(state: GameState): Ending {
   return {
     result: 'bankrupt',

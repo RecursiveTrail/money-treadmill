@@ -1,12 +1,39 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETUP, HOME_ANNUAL_RATE, HOME_YEARS } from './defaults';
-import { applyPaycheck, applySip, liquidate, payBill } from './economy';
+import { applyPaycheck, applySip, clampPlannedSip, liquidate, payBill, sipCap } from './economy';
 import { originateLoan } from './loans';
 import { startGame } from './state';
 
 function withCash(cash: number, portfolio = 0) {
   return { ...startGame(DEFAULT_SETUP), cashBuffer: cash, portfolioValue: portfolio, investedAmount: portfolio };
 }
+
+describe('sipCap', () => {
+  it('in playing is leftover cash plus salary minus living, rent, and EMIs', () => {
+    const loan = originateLoan('home', 64_00_000, HOME_ANNUAL_RATE, HOME_YEARS);
+    const state = {
+      ...withCash(10_000),
+      livingExpenses: 30_000,
+      rent: 25_000,
+      loans: [loan],
+      monthlySalary: 1_00_000,
+      phase: 'playing' as const,
+    };
+    expect(sipCap(state)).toBe(10_000 + 1_00_000 - 30_000 - 25_000 - loan.emi);
+  });
+
+  it('uses leftover cash only when this month SIP is still pending', () => {
+    const playing = withCash(80_000);
+    const awaiting = { ...playing, phase: 'awaitingEvent' as const, cashBuffer: 90_000 };
+    expect(sipCap(awaiting)).toBe(90_000);
+    expect(sipCap(playing)).toBe(80_000 + 1_00_000 - 55_000);
+  });
+
+  it('snaps planned SIP down to the cap', () => {
+    const next = clampPlannedSip({ ...withCash(10_000), plannedSip: 5_00_000, phase: 'playing' });
+    expect(next.plannedSip).toBe(sipCap(next));
+  });
+});
 
 describe('applyPaycheck', () => {
   it('adds salary minus expenses to existing cash', () => {

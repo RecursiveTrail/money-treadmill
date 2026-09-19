@@ -10,7 +10,7 @@ import {
   WEDDING_RECOMMENDED,
   WEDDING_STEP,
 } from './defaults';
-import { payBill } from './economy';
+import { clampPlannedSip, payBill } from './economy';
 import { canAffordDownPayment, downPayment, originateLoan } from './loans';
 import { pushLedger } from './state';
 import type { CarTierId, ChoiceInput, ChoiceKind, GameState, HouseTierId } from './types';
@@ -278,7 +278,7 @@ export function applyChoice(state: GameState, input: ChoiceInput): GameState {
       house: { tierId: tier.id, purchasePrice: tier.price, currentValue: tier.price },
       loans: [...next.loans, originateLoan('home', principal, HOME_ANNUAL_RATE, HOME_YEARS)],
     };
-    return pushLedger(next, 'choice', `Bought ${tier.label}`, 0);
+    return clampPlannedSip(pushLedger(next, 'choice', `Bought ${tier.label}`, 0));
   }
   if (state.pendingChoice.kind === 'car') {
     const tier = CAR_TIERS.find((row) => row.id === input.tierId);
@@ -299,7 +299,7 @@ export function applyChoice(state: GameState, input: ChoiceInput): GameState {
       ownedCar: true,
       loans: [...next.loans, originateLoan('car', principal, CAR_ANNUAL_RATE, CAR_YEARS)],
     };
-    return pushLedger(next, 'choice', `Bought ${tier.label} car`, 0);
+    return clampPlannedSip(pushLedger(next, 'choice', `Bought ${tier.label} car`, 0));
   }
   if (state.pendingChoice.kind === 'marriage') {
     if (input.spend === undefined || !Number.isFinite(input.spend)) {
@@ -316,26 +316,26 @@ export function applyChoice(state: GameState, input: ChoiceInput): GameState {
     if (next.phase === 'ended') {
       return state;
     }
-    return {
+    return clampPlannedSip({
       ...next,
       pendingChoice: null,
       phase: 'playing',
       married: true,
-    };
+    });
   }
   if (state.pendingChoice.kind === 'kid') {
     const next = payBill(state, BIRTH_COST, 'Birth and hospital bill');
     if (next.phase === 'ended') {
       return state;
     }
-    return {
+    return clampPlannedSip({
       ...next,
       pendingChoice: null,
       phase: 'playing',
       hasChild: true,
       childMonths: 0,
       livingExpenses: next.livingExpenses + KID_LIVING_BUMP,
-    };
+    });
   }
   return state;
 }

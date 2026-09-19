@@ -1,7 +1,7 @@
 import { applyBossEffect, getAnnualBoss } from './bosses';
 import { applyChoice, maybeChoice } from './choices';
 import { EVENT_CHANCE, SCHOOL_AFTER_MONTHS, SCHOOL_LIVING_BUMP } from './defaults';
-import { applyPaycheck, applySip, payBill } from './economy';
+import { applyPaycheck, applySip, clampPlannedSip, payBill } from './economy';
 import { evaluateEnding } from './ending';
 import { pickLifeEvent } from './events';
 import { applyReturns } from './returns';
@@ -58,6 +58,7 @@ export function finishMonth(state: GameState): GameState {
         `School fees begin (+₹${SCHOOL_LIVING_BUMP.toLocaleString('en-IN')}/month)`,
         0,
       );
+      bumped = clampPlannedSip(bumped);
     } else {
       bumped = { ...bumped, childMonths };
     }
