@@ -11,6 +11,9 @@ dist-ssr/
 # Superpowers brainstorm companion (session keys, mockups)
 .superpowers/
 
+# Local git worktrees
+.worktrees/
+
 # OS junk (exFAT / macOS AppleDouble)
 .DS_Store
 ._*
